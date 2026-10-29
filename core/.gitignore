@@ -1,4 +1,2 @@
 build/
 .vscode/
-Bluetooth_LE_beacon/dist/
-Bluetooth_LE_beacon/uxplay-bluetooth-beacon.spec
