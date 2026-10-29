@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.Win32;
 
 namespace UxPlayDesktop.Services;
@@ -28,27 +29,62 @@ public class BonjourService : IBonjourService
         try
         {
             var appDir = AppDomain.CurrentDomain.BaseDirectory;
-            var mdnsExe = System.IO.Path.Combine(appDir, "mDNSResponder.exe");
-            if (!System.IO.File.Exists(mdnsExe))
+            var batCandidates = new[]
             {
-                var candidate = System.IO.Path.Combine(appDir, "runtimes", "win-x64", "native", "mDNSResponder.exe");
-                if (System.IO.File.Exists(candidate)) mdnsExe = candidate;
+                Path.Combine(appDir, "fix_bonjour.bat"),
+                Path.Combine(appDir, "resources", "fix_bonjour.bat"),
+                Path.Combine(appDir, "..", "..", "fix_bonjour.bat"),
+                Path.Combine(appDir, "..", "..", "resources", "fix_bonjour.bat")
+            };
+
+            string? batPath = null;
+            foreach (var candidate in batCandidates)
+            {
+                if (File.Exists(candidate))
+                {
+                    batPath = Path.GetFullPath(candidate);
+                    break;
+                }
             }
 
-            if (System.IO.File.Exists(mdnsExe))
+            if (batPath != null)
             {
                 var psi = new ProcessStartInfo
                 {
-                    FileName = mdnsExe,
-                    Arguments = "-install",
+                    FileName = "cmd.exe",
+                    Arguments = $"/c \"\"{batPath}\"\"",
+                    WorkingDirectory = Path.GetDirectoryName(batPath),
                     Verb = "runas",
                     UseShellExecute = true
                 };
 
                 using var proc = Process.Start(psi);
-                proc?.WaitForExit(6000);
+                proc?.WaitForExit();
 
-                TryStartService();
+                return CheckStatus() == BonjourStatus.Running;
+            }
+
+            var mdnsExe = Path.Combine(appDir, "mDNSResponder.exe");
+            if (!File.Exists(mdnsExe))
+            {
+                var cand = Path.Combine(appDir, "runtimes", "win-x64", "native", "mDNSResponder.exe");
+                if (File.Exists(cand)) mdnsExe = cand;
+            }
+
+            if (File.Exists(mdnsExe))
+            {
+                var script = $"sc.exe stop \"{ServiceName}\"; sc.exe delete \"{ServiceName}\"; & '{mdnsExe}' -install; sc.exe config \"{ServiceName}\" start= auto; net start \"{ServiceName}\"";
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{script}\"",
+                    Verb = "runas",
+                    UseShellExecute = true
+                };
+
+                using var proc = Process.Start(psi);
+                proc?.WaitForExit();
+
                 return CheckStatus() == BonjourStatus.Running;
             }
 
@@ -86,7 +122,14 @@ public class BonjourService : IBonjourService
                 {
                     return BonjourStatus.Running;
                 }
-                return BonjourStatus.InstalledNotRunning;
+
+                // If stopped, verify that the binary on disk actually exists
+                if (IsServiceBinaryPresent())
+                {
+                    return BonjourStatus.InstalledNotRunning;
+                }
+
+                return BonjourStatus.NotInstalled;
             }
 
             return CheckRegistryFallback();
@@ -103,7 +146,7 @@ public class BonjourService : IBonjourService
         {
             var psi = new ProcessStartInfo
             {
-                FileName = "sc.exe",
+                FileName = "net.exe",
                 Arguments = $"start \"{ServiceName}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -122,6 +165,26 @@ public class BonjourService : IBonjourService
         }
     }
 
+    private static bool IsServiceBinaryPresent()
+    {
+        try
+        {
+            using var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\Bonjour Service");
+            if (key != null)
+            {
+                var imagePath = key.GetValue("ImagePath") as string;
+                if (!string.IsNullOrEmpty(imagePath))
+                {
+                    var cleanPath = imagePath.Trim('"');
+                    return File.Exists(cleanPath);
+                }
+            }
+        }
+        catch { }
+
+        return false;
+    }
+
     private static BonjourStatus CheckRegistryFallback()
     {
         try
@@ -129,7 +192,10 @@ public class BonjourService : IBonjourService
             using var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\Bonjour Service");
             if (key != null)
             {
-                return BonjourStatus.InstalledNotRunning;
+                if (IsServiceBinaryPresent())
+                {
+                    return BonjourStatus.InstalledNotRunning;
+                }
             }
         }
         catch { }

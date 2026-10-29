@@ -111,6 +111,9 @@ switch ($Action) {
         $resourceDest = Join-Path $publishDir "resources"
         if (-not (Test-Path $resourceDest)) { New-Item -ItemType Directory -Force -Path $resourceDest | Out-Null }
         Copy-Item -Path (Join-Path $ProjectRoot "resources\*") -Destination $resourceDest -Force -Recurse
+        if (Test-Path (Join-Path $ProjectRoot "fix_bonjour.bat")) {
+            Copy-Item -Path (Join-Path $ProjectRoot "fix_bonjour.bat") -Destination $publishDir -Force
+        }
 
         # Copy runtime dependencies and native core executable if available
         $runtimeNative = Join-Path $ProjectRoot "runtimes\win-x64\native"

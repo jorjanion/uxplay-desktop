@@ -54,22 +54,34 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         string[] searchPaths =
         [
             Path.Combine(appDir, "uxplay.exe"),
+            Path.Combine(appDir, "runtimes", "win-x64", "native", "uxplay.exe"),
             Path.Combine(appDir, "core", "uxplay.exe"),
             Path.Combine(appDir, "bin", "uxplay.exe"),
             Path.Combine(appDir, "resources", "uxplay.exe"),
-            Path.Combine(appDir, "runtimes", "win-x64", "native", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "runtimes", "win-x64", "native", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "core", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "core", "build", "uxplay.exe"),
-            Path.Combine(appDir, "..", "..", "..", "core", "uxplay.exe"),
-            Path.Combine(appDir, "..", "..", "..", "core", "build", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "..", "..", "..", "runtimes", "win-x64", "native", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "..", "..", "..", "core", "uxplay.exe"),
-            Path.Combine(appDir, "..", "..", "..", "..", "..", "core", "build", "uxplay.exe"),
-            Path.Combine(appDir, "..", "..", "..", "..", "..", "leapbtw-uxplay", "uxplay.exe"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "uxplay-windows", "uxplay.exe"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "UxPlayDesktop", "uxplay.exe"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UxPlayDesktop", "uxplay.exe")
         ];
 
+        // 1st pass: prioritize binary with adjacent runtime DLLs (libstdc++-6.dll)
+        foreach (var path in searchPaths)
+        {
+            var fullPath = Path.GetFullPath(path);
+            if (File.Exists(fullPath))
+            {
+                var dir = Path.GetDirectoryName(fullPath);
+                if (dir != null && File.Exists(Path.Combine(dir, "libstdc++-6.dll")))
+                {
+                    return fullPath;
+                }
+            }
+        }
+
+        // 2nd pass: any matching candidate in search paths
         foreach (var path in searchPaths)
         {
             var fullPath = Path.GetFullPath(path);
@@ -409,6 +421,8 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
             string[] gstCandidates =
             [
                 appDir,
+                Path.Combine(appDir, "runtimes", "win-x64", "native"),
+                Path.Combine(appDir, "core"),
                 @"C:\msys64\ucrt64\bin",
                 @"C:\msys64\mingw64\bin",
                 @"C:\gstreamer\1.0\msvc_x86_64\bin",

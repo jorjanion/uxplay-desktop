@@ -243,7 +243,7 @@
                                           Margin="0,0,0,10">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding Converter={x:Static models:PresetDisplayConverter.Instance}}" />
+                                            <TextBlock Text="{Binding Converter={x:Static models:PresetDisplayConverter.Instance}}" Foreground="White" />
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
