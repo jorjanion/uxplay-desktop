@@ -29,6 +29,28 @@ public class LogParserTests
     }
 
     [Fact]
+    public void ParseLine_NativeUxPlayRemoteIp_ExtractsClientIp()
+    {
+        var line = "raop_rtp_mirror parse remote ip = 192.168.1.88";
+        var result = _parser.ParseLine(line);
+
+        Assert.Equal("192.168.1.88", result.DetectedClientIp);
+        Assert.Equal(ServerState.Connecting, result.NewState);
+    }
+
+    [Fact]
+    public void ParseLine_NativeUxPlayConnectionRequest_ExtractsNameAndModel()
+    {
+        var line = "connection request from Jorge's iPad Pro (iPad13,8) with deviceID = 48:A1:95:22:33:44";
+        var result = _parser.ParseLine(line);
+
+        Assert.NotNull(result.DetectedClientName);
+        Assert.Contains("Jorge's iPad Pro", result.DetectedClientName);
+        Assert.Contains("iPad", result.DetectedClientName);
+        Assert.Equal(ServerState.Connecting, result.NewState);
+    }
+
+    [Fact]
     public void ParseLine_CodecAndGeometry_ExtractsFormatAndResolution()
     {
         var line = "*** codec is h264: geometry is (w,h)=(1920,1080) (source); (x,y)=(0,0); (w,h)=(1920,1080)";
@@ -46,6 +68,15 @@ public class LogParserTests
 
         Assert.Equal("H.265 (HEVC)", result.DetectedCodec);
         Assert.Equal("3840x2160", result.DetectedResolution);
+    }
+
+    [Fact]
+    public void ParseLine_NativeUxPlayQuotedPin_ExtractsPinCode()
+    {
+        var line = "*** CLIENT MUST NOW ENTER PIN = \"4921\" AS AIRPLAY PASSWORD";
+        var result = _parser.ParseLine(line);
+
+        Assert.Equal("4921", result.DetectedPin);
     }
 
     [Fact]
@@ -71,6 +102,16 @@ public class LogParserTests
     public void ParseLine_ClientDisconnect_SetsDisconnectedFlag()
     {
         var line = "video_reset: type = RTP_Shutdown";
+        var result = _parser.ParseLine(line);
+
+        Assert.True(result.ClientDisconnected);
+        Assert.Equal(ServerState.Listening, result.NewState);
+    }
+
+    [Fact]
+    public void ParseLine_TeardownDisconnect_SetsDisconnectedFlag()
+    {
+        var line = "TEARDOWN request,  96=1, 110=0";
         var result = _parser.ParseLine(line);
 
         Assert.True(result.ClientDisconnected);

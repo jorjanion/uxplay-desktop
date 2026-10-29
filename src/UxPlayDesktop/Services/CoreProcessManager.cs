@@ -55,11 +55,19 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         [
             Path.Combine(appDir, "uxplay.exe"),
             Path.Combine(appDir, "core", "uxplay.exe"),
+            Path.Combine(appDir, "bin", "uxplay.exe"),
+            Path.Combine(appDir, "resources", "uxplay.exe"),
             Path.Combine(appDir, "runtimes", "win-x64", "native", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "core", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "core", "build", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "..", "core", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "..", "core", "build", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "..", "..", "..", "core", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "..", "..", "..", "core", "build", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "..", "..", "..", "leapbtw-uxplay", "uxplay.exe"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "uxplay-windows", "uxplay.exe"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "UxPlayDesktop", "uxplay.exe")
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "UxPlayDesktop", "uxplay.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UxPlayDesktop", "uxplay.exe")
         ];
 
         foreach (var path in searchPaths)
@@ -129,6 +137,8 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
             StandardOutputEncoding = System.Text.Encoding.UTF8,
             StandardErrorEncoding = System.Text.Encoding.UTF8
         };
+
+        ConfigureEnvironmentVariables(startInfo);
 
         try
         {
@@ -361,6 +371,34 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         CurrentSession.ConnectedAt = null;
         CurrentSession.CurrentFps = 0;
         CurrentSession.ActivePinCode = null;
+    }
+
+    private static void ConfigureEnvironmentVariables(ProcessStartInfo startInfo)
+    {
+        try
+        {
+            string[] gstCandidates =
+            [
+                @"C:\msys64\ucrt64\bin",
+                @"C:\msys64\mingw64\bin",
+                @"C:\gstreamer\1.0\msvc_x86_64\bin",
+                @"C:\gstreamer\1.0\mingw_x86_64\bin"
+            ];
+
+            var pathVar = startInfo.EnvironmentVariables["PATH"] ?? Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+            var paths = new System.Collections.Generic.List<string>(pathVar.Split(';', StringSplitOptions.RemoveEmptyEntries));
+
+            foreach (var candidate in gstCandidates)
+            {
+                if (Directory.Exists(candidate) && !paths.Contains(candidate, StringComparer.OrdinalIgnoreCase))
+                {
+                    paths.Insert(0, candidate);
+                }
+            }
+
+            startInfo.EnvironmentVariables["PATH"] = string.Join(";", paths);
+        }
+        catch { }
     }
 
     private void Log(LogLevel level, string message)

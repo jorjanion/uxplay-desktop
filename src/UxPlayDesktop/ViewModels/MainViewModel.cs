@@ -161,10 +161,10 @@ public class MainViewModel : ViewModelBase
         _settings = _settingsService.CurrentSettings;
         Logs = new LogsViewModel();
 
-        _processManager.StateChanged += state => Application.Current.Dispatcher.Invoke(() => ServerState = state);
-        _processManager.SessionUpdated += _ => Application.Current.Dispatcher.Invoke(OnSessionUpdated);
-        _processManager.LogReceived += entry => Application.Current.Dispatcher.Invoke(() => Logs.AddEntry(entry));
-        _processManager.PinCodePrompt += pin => Application.Current.Dispatcher.Invoke(() => ActivePinCode = pin);
+        _processManager.StateChanged += state => RunOnUi(() => ServerState = state);
+        _processManager.SessionUpdated += _ => RunOnUi(OnSessionUpdated);
+        _processManager.LogReceived += entry => RunOnUi(() => Logs.AddEntry(entry));
+        _processManager.PinCodePrompt += pin => RunOnUi(() => ActivePinCode = pin);
 
         ToggleServerCommand = new RelayCommand(async () => await ToggleServerAsync());
         SaveSettingsCommand = new RelayCommand(SaveSettings);
@@ -272,6 +272,19 @@ public class MainViewModel : ViewModelBase
         else
         {
             FormattedDuration = "00:00:00";
+        }
+    }
+
+    private static void RunOnUi(Action action)
+    {
+        var app = Application.Current;
+        if (app?.Dispatcher != null && !app.Dispatcher.CheckAccess())
+        {
+            app.Dispatcher.BeginInvoke(action);
+        }
+        else
+        {
+            action();
         }
     }
 }

@@ -87,7 +87,27 @@ public class ArgumentBuilderTests
     }
 
     [Fact]
-    public void BuildArguments_AudioDelayCalibration_PassesDelayMs()
+    public void BuildArguments_ZeroPin_DoesNotPassFixedPin_BecauseZeroIsInvalidInUxPlay()
+    {
+        var settings = new AppSettings
+        {
+            RequirePin = true,
+            FixedPin = "0000"
+        };
+
+        var args = _builder.BuildArguments(settings).ToList();
+
+        var pinIndex = args.IndexOf("-pin");
+        Assert.True(pinIndex >= 0);
+        // Next argument should not be "0000"
+        if (pinIndex + 1 < args.Count)
+        {
+            Assert.NotEqual("0000", args[pinIndex + 1]);
+        }
+    }
+
+    [Fact]
+    public void BuildArguments_AudioDelayCalibration_PassesVsyncDelayMs()
     {
         var settings = new AppSettings
         {
@@ -97,9 +117,10 @@ public class ArgumentBuilderTests
 
         var args = _builder.BuildArguments(settings).ToList();
 
-        var delayIndex = args.IndexOf("-delay");
+        var delayIndex = args.IndexOf("-vsync");
         Assert.True(delayIndex >= 0);
         Assert.Equal("75", args[delayIndex + 1]);
+        Assert.DoesNotContain("-delay", args);
     }
 
     [Fact]
@@ -130,7 +151,7 @@ public class ArgumentBuilderTests
     }
 
     [Fact]
-    public void BuildArguments_NegativeAudioDelay_AppliesNegativeMs()
+    public void BuildArguments_NegativeAudioDelay_AppliesNegativeVsync()
     {
         var settings = new AppSettings
         {
@@ -138,8 +159,23 @@ public class ArgumentBuilderTests
         };
 
         var args = _builder.BuildArguments(settings).ToList();
-        var delayIndex = args.IndexOf("-delay");
+        var delayIndex = args.IndexOf("-vsync");
         Assert.True(delayIndex >= 0);
         Assert.Equal("-120", args[delayIndex + 1]);
+    }
+
+    [Fact]
+    public void SplitCommandLine_HandlesTabsAndEscapedQuotes()
+    {
+        var cmd = "-vs\td3d11videosink -name \"My \\\"Special\\\" Screen\" -fps 60";
+        var tokens = ArgumentBuilder.SplitCommandLine(cmd);
+
+        Assert.Equal(6, tokens.Count);
+        Assert.Equal("-vs", tokens[0]);
+        Assert.Equal("d3d11videosink", tokens[1]);
+        Assert.Equal("-name", tokens[2]);
+        Assert.Equal("My \"Special\" Screen", tokens[3]);
+        Assert.Equal("-fps", tokens[4]);
+        Assert.Equal("60", tokens[5]);
     }
 }

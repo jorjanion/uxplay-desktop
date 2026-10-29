@@ -7,6 +7,7 @@
         xmlns:models="clr-namespace:UxPlayDesktop.Models"
         mc:Ignorable="d"
         Title="UxPlay Desktop - AirPlay Mirroring"
+        Icon="resources/newicon.ico"
         Height="720" Width="960"
         MinHeight="600" MinWidth="800"
         Background="{StaticResource AppBackgroundBrush}"
@@ -42,11 +43,7 @@
                         </StackPanel>
                         <!-- Status subtitle with colored dot -->
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <Ellipse Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center">
-                                <Ellipse.Fill>
-                                    <SolidColorBrush Color="{Binding StatusColor}" />
-                                </Ellipse.Fill>
-                            </Ellipse>
+                            <Ellipse Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" Fill="{Binding StatusColor}" />
                             <TextBlock Text="{Binding StatusTitle}" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,8,0" />
                             <TextBlock Text="•" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,8,0" />
                             <TextBlock Text="{Binding StatusDescription}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />

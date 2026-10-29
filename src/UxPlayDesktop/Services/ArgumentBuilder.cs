@@ -99,10 +99,11 @@ public class ArgumentBuilder : IArgumentBuilder
         }
         else
         {
-            if (settings.AudioDelayMs != 0)
+            if (settings.Preset != PerformancePreset.LowLatencyGaming && settings.AudioDelayMs != 0)
             {
-                args.Add("-delay");
-                args.Add(settings.AudioDelayMs.ToString());
+                var clampedDelay = Math.Clamp(settings.AudioDelayMs, -999, 999);
+                args.Add("-vsync");
+                args.Add(clampedDelay.ToString());
             }
             if (!string.IsNullOrWhiteSpace(settings.AudioSink) && settings.AudioSink != "autoaudiosink")
             {
@@ -122,7 +123,10 @@ public class ArgumentBuilder : IArgumentBuilder
         if (settings.RequirePin)
         {
             args.Add("-pin");
-            if (!string.IsNullOrWhiteSpace(settings.FixedPin) && settings.FixedPin.Length == 4)
+            if (!string.IsNullOrWhiteSpace(settings.FixedPin) &&
+                settings.FixedPin.Length == 4 &&
+                int.TryParse(settings.FixedPin, out var pinVal) &&
+                pinVal >= 1 && pinVal <= 9999)
             {
                 args.Add(settings.FixedPin);
             }
@@ -181,19 +185,52 @@ public class ArgumentBuilder : IArgumentBuilder
         var list = new List<string>();
         if (string.IsNullOrWhiteSpace(commandLine)) return list;
 
-        var matches = Regex.Matches(commandLine, @"[\""].+?[\""]|[^ ]+");
-        foreach (Match match in matches)
+        var sb = new StringBuilder();
+        bool inQuotes = false;
+        bool escapeNext = false;
+
+        for (int i = 0; i < commandLine.Length; i++)
         {
-            var value = match.Value.Trim();
-            if (value.StartsWith('"') && value.EndsWith('"') && value.Length >= 2)
+            char c = commandLine[i];
+            if (escapeNext)
             {
-                value = value[1..^1];
+                sb.Append(c);
+                escapeNext = false;
             }
-            if (!string.IsNullOrEmpty(value))
+            else if (c == '\\')
             {
-                list.Add(value);
+                if (inQuotes && i + 1 < commandLine.Length && commandLine[i + 1] == '"')
+                {
+                    escapeNext = true;
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            else if (c == '"')
+            {
+                inQuotes = !inQuotes;
+            }
+            else if (char.IsWhiteSpace(c) && !inQuotes)
+            {
+                if (sb.Length > 0)
+                {
+                    list.Add(sb.ToString());
+                    sb.Clear();
+                }
+            }
+            else
+            {
+                sb.Append(c);
             }
         }
+
+        if (sb.Length > 0)
+        {
+            list.Add(sb.ToString());
+        }
+
         return list;
     }
 }

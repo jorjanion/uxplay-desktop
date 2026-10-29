@@ -1,13 +1,16 @@
 <#
 .SYNOPSIS
-    UxPlay Desktop unified build and test automation script.
+    UxPlay Desktop unified build, test, and package automation script.
 .DESCRIPTION
-    Builds the modern WPF desktop application, runs test suites,
-    verifies native dependencies, and creates publishable release artifacts.
+    Builds the native C++ core engine (when MSYS2 is available), compiles the
+    modern WPF desktop application, runs unit test suites, and creates
+    publishable release artifacts.
 .PARAMETER Action
     Target action: build, test, package, or clean. Default is 'build'.
 .PARAMETER Configuration
     Build configuration: Debug or Release. Default is 'Release'.
+.PARAMETER MsysRoot
+    Path to MSYS2 installation. Defaults to $env:MSYS2_ROOT or 'C:\msys64'.
 #>
 [CmdletBinding()]
 param(
@@ -15,7 +18,9 @@ param(
     [string]$Action = "build",
 
     [ValidateSet("Debug", "Release")]
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+
+    [string]$MsysRoot = $(if ($env:MSYS2_ROOT) { $env:MSYS2_ROOT } else { "C:\msys64" })
 )
 
 $ErrorActionPreference = "Stop"
@@ -34,6 +39,21 @@ $env:PATH = "$env:USERPROFILE\.dotnet;$env:PATH"
 $SolutionPath = Join-Path $ProjectRoot "UxPlayDesktop.sln"
 $OutDir = Join-Path $ProjectRoot "out"
 
+function Build-NativeCore {
+    $cmake = Join-Path $MsysRoot "ucrt64\bin\cmake.exe"
+    if (Test-Path $cmake) {
+        Write-Host "MSYS2 UCRT64 toolchain detected. Compiling native core engine..." -ForegroundColor Yellow
+        $coreBuildDir = Join-Path $ProjectRoot "core\build"
+        if (-not (Test-Path $coreBuildDir)) { New-Item -ItemType Directory -Force -Path $coreBuildDir | Out-Null }
+
+        & $cmake -S (Join-Path $ProjectRoot "core") -B $coreBuildDir -G "Ninja" -DCMAKE_BUILD_TYPE="Release"
+        & $cmake --build $coreBuildDir
+        Write-Host "Native core build completed successfully." -ForegroundColor Green
+    } else {
+        Write-Host "MSYS2 toolchain not detected at '$MsysRoot'. Skipping native core compilation." -ForegroundColor Gray
+    }
+}
+
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " UxPlay Desktop Build System [$Action - $Configuration]" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -45,10 +65,16 @@ switch ($Action) {
         if (Test-Path $OutDir) {
             Remove-Item -Recurse -Force $OutDir
         }
+        $coreBuildDir = Join-Path $ProjectRoot "core\build"
+        if (Test-Path $coreBuildDir) {
+            Remove-Item -Recurse -Force $coreBuildDir
+        }
         Write-Host "Clean completed successfully." -ForegroundColor Green
     }
 
     "build" {
+        Build-NativeCore
+
         Write-Host "Building UxPlay Desktop WPF Solution ($Configuration)..." -ForegroundColor Yellow
         & $DotnetExe build $SolutionPath -c $Configuration --nologo
         Write-Host "Build completed successfully." -ForegroundColor Green
@@ -61,6 +87,8 @@ switch ($Action) {
     }
 
     "package" {
+        Build-NativeCore
+
         Write-Host "Building Release binaries..." -ForegroundColor Yellow
         & $DotnetExe build $SolutionPath -c "Release" --nologo
 
@@ -83,6 +111,27 @@ switch ($Action) {
         $resourceDest = Join-Path $publishDir "resources"
         if (-not (Test-Path $resourceDest)) { New-Item -ItemType Directory -Force -Path $resourceDest | Out-Null }
         Copy-Item -Path (Join-Path $ProjectRoot "resources\*") -Destination $resourceDest -Force -Recurse
+
+        # Copy native core executable if available
+        $nativeCandidates = @(
+            (Join-Path $ProjectRoot "core\build\uxplay.exe"),
+            (Join-Path $ProjectRoot "core\uxplay.exe")
+        )
+        foreach ($nativeExe in $nativeCandidates) {
+            if (Test-Path $nativeExe) {
+                Write-Host "Bundling native UxPlay core: $nativeExe" -ForegroundColor Green
+                Copy-Item -Path $nativeExe -Destination (Join-Path $publishDir "uxplay.exe") -Force
+                break
+            }
+        }
+
+        # Copy BLE beacon scripts
+        $bleScript = Join-Path $ProjectRoot "core\Bluetooth_LE_beacon\uxplay-beacon-windows.py"
+        if (Test-Path $bleScript) {
+            $scriptsDir = Join-Path $publishDir "scripts"
+            if (-not (Test-Path $scriptsDir)) { New-Item -ItemType Directory -Force -Path $scriptsDir | Out-Null }
+            Copy-Item -Path $bleScript -Destination (Join-Path $scriptsDir "uxplay-beacon-windows.py") -Force
+        }
 
         $artifactDir = Join-Path $OutDir "artifacts"
         if (-not (Test-Path $artifactDir)) { New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null }

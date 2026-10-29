@@ -29,10 +29,12 @@ public interface ILogParser
 
 public class LogParser : ILogParser
 {
-    private static readonly Regex PinRegex = new(@"pin(?:\s+is)?\s*[:=]?\s*([0-9]{4})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex ClientIpRegex = new(@"(?:connected from|client connected|from client|connection from)(?::|\s)+\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex PinRegex = new(@"pin(?:\s+is)?\s*[:=]?\s*[""']?([0-9]{4})[""']?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex ClientIpRegex = new(@"(?:\b(?:connected from|client connected|from client|connection from|remote ip|parse remote ip)\b[:=\s]+)\s*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex GeometryRegex = new(@"codec is\s+(h26[45]|jpeg).*?\(w,h\)=\(([0-9]+),([0-9]+)\)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex FpsRegex = new(@"([0-9]+(?:\.[0-9]+)?)\s*fps", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex ConnectionRequestRegex = new(@"connection request from\s+(?<name>.+?)\s*\((?<model>[A-Za-z0-9,]+)\)\s*with deviceID\s*=\s*(?<id>[0-9A-Fa-f:]+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex RegisteredClientRegex = new(@"registered new client:\s*(?<name>.+?)\s+DeviceID\s*=\s*(?<id>[0-9A-Fa-f:]+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex DeviceModelRegex = new(@"model\s*[:=]\s*([A-Za-z0-9,]+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public LogParseResult ParseLine(string rawLine)
@@ -41,11 +43,13 @@ public class LogParser : ILogParser
         var trimmed = rawLine.Trim();
 
         var level = LogLevel.Info;
-        if (trimmed.StartsWith("*** ERROR", StringComparison.OrdinalIgnoreCase))
+        if (trimmed.StartsWith("*** ERROR", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0 && trimmed.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
         {
             level = LogLevel.Error;
         }
-        else if (trimmed.StartsWith("*** WARNING", StringComparison.OrdinalIgnoreCase))
+        else if (trimmed.StartsWith("*** WARNING", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.IndexOf("warning", StringComparison.OrdinalIgnoreCase) >= 0)
         {
             level = LogLevel.Warning;
         }
@@ -69,15 +73,44 @@ public class LogParser : ILogParser
         }
         else if (trimmed.Contains("AirPlay server started", StringComparison.OrdinalIgnoreCase) ||
                  trimmed.Contains("Initialized AirPlay server", StringComparison.OrdinalIgnoreCase) ||
-                 trimmed.Contains("Listening for connections", StringComparison.OrdinalIgnoreCase))
+                 trimmed.Contains("Listening for connections", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("Initialized server socket", StringComparison.OrdinalIgnoreCase))
         {
             result.NewState = ServerState.Listening;
         }
         else if (trimmed.Contains("Stopping RAOP Server", StringComparison.OrdinalIgnoreCase) ||
-                 trimmed.Contains("video_reset: type = RTP_Shutdown", StringComparison.OrdinalIgnoreCase))
+                 trimmed.Contains("video_reset: type = RTP_Shutdown", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("TEARDOWN request", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("lost connection with client", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("tcp socket was closed by client", StringComparison.OrdinalIgnoreCase))
         {
             result.NewState = ServerState.Listening;
             result.ClientDisconnected = true;
+        }
+
+        // Connection request / device info detection (native UxPlay logs)
+        var connMatch = ConnectionRequestRegex.Match(trimmed);
+        if (connMatch.Success)
+        {
+            var rawName = connMatch.Groups["name"].Value.Trim();
+            var rawModel = connMatch.Groups["model"].Value.Trim();
+            result.DetectedClientName = $"{rawName} ({MapDeviceModel(rawModel)})";
+            if (result.NewState == null)
+            {
+                result.NewState = ServerState.Connecting;
+            }
+        }
+        else
+        {
+            var regMatch = RegisteredClientRegex.Match(trimmed);
+            if (regMatch.Success)
+            {
+                result.DetectedClientName = regMatch.Groups["name"].Value.Trim();
+                if (result.NewState == null)
+                {
+                    result.NewState = ServerState.Connecting;
+                }
+            }
         }
 
         // IP detection
@@ -116,11 +149,14 @@ public class LogParser : ILogParser
             result.DetectedFps = fps;
         }
 
-        // Model detection
-        var modelMatch = DeviceModelRegex.Match(trimmed);
-        if (modelMatch.Success)
+        // Fallback model detection
+        if (result.DetectedClientName == null)
         {
-            result.DetectedClientName = MapDeviceModel(modelMatch.Groups[1].Value);
+            var modelMatch = DeviceModelRegex.Match(trimmed);
+            if (modelMatch.Success)
+            {
+                result.DetectedClientName = MapDeviceModel(modelMatch.Groups[1].Value);
+            }
         }
 
         return result;
