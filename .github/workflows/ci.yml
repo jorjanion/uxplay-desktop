@@ -1,0 +1,44 @@
+name: CI Build & Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build, Test & Package
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET 8 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore UxPlayDesktop.sln
+
+    - name: Build Solution
+      run: dotnet build UxPlayDesktop.sln -c Release --no-restore
+
+    - name: Run Test Suite
+      run: dotnet test UxPlayDesktop.sln -c Release --no-build --verbosity normal
+
+    - name: Package Desktop Artifacts
+      shell: pwsh
+      run: .\build.ps1 -Action package -Configuration Release
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: UxPlayDesktop-win-x64
+        path: out/artifacts/UxPlayDesktop-win-x64.zip
+        retention-days: 14
