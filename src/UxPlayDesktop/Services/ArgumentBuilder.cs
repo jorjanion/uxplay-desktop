@@ -112,13 +112,6 @@ public class ArgumentBuilder : IArgumentBuilder
             }
         }
 
-        // Screensaver / Display Sleep Inhibition
-        if (settings.InhibitSleepAndScreensaver && settings.Preset != PerformancePreset.AudioOnly)
-        {
-            args.Add("-scrsv");
-            args.Add("1"); // Inhibit while actively mirroring
-        }
-
         // Security / Pairing
         if (settings.RequirePin)
         {

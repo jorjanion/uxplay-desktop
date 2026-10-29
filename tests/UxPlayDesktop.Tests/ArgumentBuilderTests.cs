@@ -35,8 +35,6 @@ public class ArgumentBuilderTests
         Assert.Contains("-vs", args);
         Assert.Contains("d3d11videosink", args);
         Assert.Contains("-h265", args);
-        Assert.Contains("-scrsv", args);
-        Assert.Contains("1", args);
     }
 
     [Fact]
