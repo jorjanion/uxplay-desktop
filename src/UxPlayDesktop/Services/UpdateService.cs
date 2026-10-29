@@ -129,15 +129,16 @@ public class UpdateService : IUpdateService
             var downloadedFile = Path.Combine(tempDir, isExe ? "UxPlayDesktop-Setup.exe" : "update.zip");
 
             // Download stream
+            long totalBytes = -1L;
+            long totalRead = 0;
             using (var response = await _httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
             {
                 response.EnsureSuccessStatusCode();
-                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                totalBytes = response.Content.Headers.ContentLength ?? -1L;
                 using var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 using var fileStream = new FileStream(downloadedFile, FileMode.Create, FileAccess.Write, FileShare.None);
 
                 var buffer = new byte[81920];
-                long totalRead = 0;
                 int read;
                 while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
                 {
@@ -151,8 +152,21 @@ public class UpdateService : IUpdateService
                 }
             }
 
+            if (totalBytes > 0 && totalRead < totalBytes)
+            {
+                LastError = $"Download was incomplete ({totalRead}/{totalBytes} bytes). Please try again.";
+                return false;
+            }
+
             if (isExe)
             {
+                var fi = new FileInfo(downloadedFile);
+                if (!fi.Exists || fi.Length < 50_000_000)
+                {
+                    LastError = $"Downloaded update package is incomplete ({fi.Length / 1024 / 1024} MB). Please try again or download directly from GitHub Releases.";
+                    return false;
+                }
+
                 // Cleanly kill native engine process prior to running update
                 try
                 {
@@ -163,11 +177,11 @@ public class UpdateService : IUpdateService
                 }
                 catch { }
 
-                // Direct installer update: run installer with force close and exit
+                // Run installer with /CLOSEAPPLICATIONS and /SILENT for automated upgrade
                 var psi = new ProcessStartInfo
                 {
                     FileName = downloadedFile,
-                    Arguments = "/SILENT /FORCECLOSEAPPLICATIONS",
+                    Arguments = "/CLOSEAPPLICATIONS /SILENT",
                     UseShellExecute = true,
                     Verb = "runas"
                 };

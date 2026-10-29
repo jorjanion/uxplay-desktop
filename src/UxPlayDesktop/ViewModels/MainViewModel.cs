@@ -142,7 +142,7 @@ public class MainViewModel : ViewModelBase
     public string DisplayTargetFps => string.Format(Loc["TargetFpsFormat"], Settings.TargetFps);
     public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
     public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
-    public string AppVersionDisplay => "UxPlay Desktop v1.1.4";
+    public string AppVersionDisplay => "UxPlay Desktop v1.1.5";
 
     public string StatusColor => ServerState switch
     {
@@ -298,8 +298,10 @@ public class MainViewModel : ViewModelBase
 
     private async Task ApplyUpdateAsync()
     {
+        if (IsUpdating) return;
         if (_latestUpdate == null || string.IsNullOrEmpty(_latestUpdate.DownloadUrl)) return;
         IsUpdating = true;
+        UpdateProgress = 0;
         bool ok = await _updateService.DownloadAndApplyUpdateAsync(_latestUpdate.DownloadUrl, p => RunOnUi(() => UpdateProgress = p));
         if (!ok)
         {

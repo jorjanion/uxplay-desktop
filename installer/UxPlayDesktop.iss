@@ -2,7 +2,7 @@
 ; High-performance, self-contained Windows AirPlay installer
 
 #define MyAppName "UxPlay Desktop"
-#define MyAppVersion "1.1.4"
+#define MyAppVersion "1.1.5"
 #define MyAppPublisher "jorjanion"
 #define MyAppURL "https://github.com/jorjanion/uxplay-desktop"
 #define MyAppExeName "UxPlayDesktop.exe"
@@ -32,6 +32,7 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 CloseApplications=force
 RestartApplications=no
 CloseApplicationsFilter=*.exe,*.dll
+DisableFinishedPage=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -79,10 +80,8 @@ Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 [Run]
 ; Automatically configure Bonjour Service and open Windows Firewall ports for AirPlay
 Filename: "{app}\fix_bonjour.bat"; Parameters: "/silent"; Flags: runhidden waituntilterminated
-; Launch in normal interactive mode (pre-checked checkbox on finish page)
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall; Check: not WizardSilent
-; Automatically launch when updated or installed silently without requiring user interaction
-Filename: "{app}\{#MyAppExeName}"; Flags: nowait; Check: WizardSilent
+; Always launch UxPlay Desktop immediately upon completion
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait
 
 [UninstallRun]
 Filename: "sc.exe"; Parameters: "stop ""Bonjour Service"""; Flags: runhidden

@@ -160,6 +160,9 @@ switch ($Action) {
             Write-Host "Compiling native Windows Setup Installer (Inno Setup)..." -ForegroundColor Yellow
             $issPath = Join-Path $ProjectRoot "installer\UxPlayDesktop.iss"
             & $isccExe $issPath
+            if ($LASTEXITCODE -ne 0) {
+                throw "Inno Setup compilation failed with exit code $LASTEXITCODE"
+            }
             Write-Host "Native Setup Installer created successfully." -ForegroundColor Green
         }
 

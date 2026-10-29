@@ -122,22 +122,73 @@
                                 Margin="0,0,0,16"
                                 Visibility="{Binding IsUpdateAvailable, Converter={x:Static models:ObjectToVisibilityConverter.Instance}, FallbackValue=Collapsed}">
                             <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="🚀 " FontSize="14" />
-                                        <TextBlock Text="{Binding Loc[UpdateAvailableTitle]}" FontWeight="Bold" FontSize="14" Foreground="#90CAF9" />
-                                        <TextBlock Text="{Binding UpdateVersionText, StringFormat=' ({0})'}" FontWeight="Bold" FontSize="14" Foreground="White" />
+                                <!-- State 1: When NOT updating -->
+                                <Grid Visibility="{Binding IsUpdating, Converter={x:Static models:InverseBoolToVisibilityConverter.Instance}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="🚀 " FontSize="14" />
+                                            <TextBlock Text="{Binding Loc[UpdateAvailableTitle]}" FontWeight="Bold" FontSize="14" Foreground="#90CAF9" />
+                                            <TextBlock Text="{Binding UpdateVersionText, StringFormat=' ({0})'}" FontWeight="Bold" FontSize="14" Foreground="White" />
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Loc[UpdateAvailableDesc]}" Foreground="#E3F2FD" FontSize="12" Margin="0,4,0,0" />
                                     </StackPanel>
-                                    <TextBlock Text="{Binding Loc[UpdateAvailableDesc]}" Foreground="#E3F2FD" FontSize="12" Margin="0,4,0,0" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Content="{Binding Loc[UpdateNow]}" Command="{Binding ApplyUpdateCommand}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                                    <Button Content="{Binding Loc[UpdateLater]}" Command="{Binding DismissUpdateCommand}" Style="{StaticResource SecondaryButtonStyle}" />
-                                </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="{Binding Loc[UpdateNow]}" Command="{Binding ApplyUpdateCommand}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                                        <Button Content="{Binding Loc[UpdateLater]}" Command="{Binding DismissUpdateCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- State 2: When actively downloading update -->
+                                <Grid Visibility="{Binding IsUpdating, Converter={x:Static models:ObjectToVisibilityConverter.Instance}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="⏳ " FontSize="14" />
+                                            <TextBlock Text="{Binding Loc[DownloadingUpdate]}" FontWeight="Bold" FontSize="14" Foreground="#90CAF9" />
+                                            <TextBlock Text="{Binding UpdateProgress, StringFormat=' ({0}%)'}" FontWeight="Bold" FontSize="14" Foreground="#FFD54F" Margin="6,0,0,0" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding Loc[PleaseWait]}" FontSize="12" Foreground="#90CAF9" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <ProgressBar Grid.Row="1"
+                                                 Value="{Binding UpdateProgress}"
+                                                 Minimum="0"
+                                                 Maximum="100"
+                                                 Height="8"
+                                                 Margin="0,10,0,0"
+                                                 Background="#0F2840"
+                                                 Foreground="#38BDF8"
+                                                 BorderThickness="0">
+                                        <ProgressBar.Style>
+                                            <Style TargetType="ProgressBar">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="ProgressBar">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                                <Grid x:Name="PART_Track">
+                                                                    <Border x:Name="PART_Indicator"
+                                                                            Background="{TemplateBinding Foreground}"
+                                                                            CornerRadius="4"
+                                                                            HorizontalAlignment="Left" />
+                                                                </Grid>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ProgressBar.Style>
+                                    </ProgressBar>
+                                </Grid>
                             </Grid>
                         </Border>
 
