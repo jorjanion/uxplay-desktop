@@ -6,10 +6,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jorjanion/uxplay-desktop/releases/latest"><img src="https://img.shields.io/github/v/release/jorjanion/uxplay-desktop?color=blue&label=%C3%9Altima%20Versi%C3%B3n" alt="Release"></a>
+  <a href="https://github.com/jorjanion/uxplay-desktop/releases/latest"><img src="https://img.shields.io/github/v/release/jorjanion/uxplay-desktop?color=blue&label=Última Versión" alt="Release"></a>
   <a href="https://github.com/jorjanion/uxplay-desktop/blob/main/LICENSE"><img src="https://img.shields.io/badge/Licencia-GPL%20v3.0-green.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/Plataforma-Windows%2010%20%7C%2011%20(x64)-0078D6?logo=windows" alt="Platform">
-  <img src="https://img.shields.io/badge/.NET-8.0%20Integrado-512BD4?logo=dotnet" alt=".NET 8">
+  <img src="https://img.shields.io/badge/.NET-8.0%20Self--Contained-512BD4?logo=dotnet" alt=".NET 8">
   <img src="https://img.shields.io/badge/Direct3D-11%20%2F%2012%20Hardware-orange" alt="Direct3D">
   <img src="https://img.shields.io/badge/Coste-0%20%E2%82%AC%20Libre%20y%20Gratuito-brightgreen" alt="Cost">
 </p>
@@ -28,6 +28,7 @@ Muchos profesionales, docentes y usuarios que comparten la pantalla de su iPad o
 - **Otras herramientas libres antiguas** se congelan en el primer fotograma con las últimas versiones de iPadOS, requieren comandos técnicos raros por consola, sufren desincronización de audio o fallan por falta de librerías DLL y servicios de Linux.
 
 **UxPlay Desktop** ha sido diseñado desde cero para solucionar todo esto de forma definitiva:
+
 - **📦 Instalador Nativo Directo (`.exe`):** Olvídate de descomprimir zips ni lidiar con carpetas. Descargas el instalador, pulsas Siguiente y te lo deja todo listo.
 - **🚀 100% Autónomo (Self-Contained):** No te pedirá descargar .NET ni componentes externos; incluye el motor de .NET 8, librerías C++ y plugins de GStreamer en su propio ejecutable.
 - **⚡ Aceleración Direct3D 11/12 por Hardware:** 60 FPS ultra fluidos, nitidez absoluta en los trazos de GoodNotes y Notability y latencia imperceptible.
@@ -40,15 +41,10 @@ Muchos profesionales, docentes y usuarios que comparten la pantalla de su iPad o
 
 ## 📖 Guía Rápida para Usuarios (Puesta en Marcha en 3 Pasos)
 
-
 ### Paso 1: Instalar el Programa
 1. Descarga el instalador **[`UxPlayDesktop-Setup.exe`](https://github.com/jorjanion/uxplay-desktop/releases/latest)** de la última versión.
-2. Abre el instalador y sigue las instrucciones en pantalla.
-3. El instalador se encargará automáticamente de:
-   - Instalar UxPlay Desktop en la carpeta de Programas.
-   - Configurar el servicio de descubrimiento Apple Bonjour.
-   - Abrir las reglas en el Firewall de Windows para que tu iPad y iPhone puedan conectarse sin bloqueos.
-   - Crear un acceso directo en tu Escritorio y preguntar si deseas iniciarlo con Windows.
+2. Abre el instalador y sigue las sencillas instrucciones en pantalla.
+3. El instalador se encargará automáticamente de instalar la aplicación, registrar el servicio Bonjour y habilitar las excepciones en el Firewall de Windows.
 
 ### Paso 2: Iniciar el Servidor AirPlay
 1. Abre **UxPlay Desktop** desde tu Escritorio o el menú Inicio.
@@ -62,10 +58,7 @@ Muchos profesionales, docentes y usuarios que comparten la pantalla de su iPad o
 4. Elige **"UxPlay Windows"** en la lista.
 5. ¡Listo! La pantalla de tu iPad aparecerá al instante en tu monitor a 60 FPS sin retraso.
 
----
-
-## 🎛️ Perfiles de Rendimiento (Presets Explicados)
-
+### Perfiles de Rendimiento (Presets Explicados)
 | Perfil | Recomendado para | ¿Qué hace? |
 | :--- | :--- | :--- |
 | **🎓 Clases y Presentaciones** *(Por defecto)* | Docencia, presentaciones, pizarra digital y diapositivas | Máxima nitidez de texto, aceleración Direct3D y bloqueo automático del salvapantallas para que la pantalla no se apague en clase. |
@@ -78,7 +71,7 @@ Muchos profesionales, docentes y usuarios que comparten la pantalla de su iPad o
 ## 🛠️ Preguntas Frecuentes y Solución de Problemas
 
 - **¿El iPad o iPhone no detecta "UxPlay Windows" en Duplicar Pantalla?**
-  1. Asegúrate de que ambos dispositivos están conectados a la **misma red Wi-Fi** (ojo con redes de invitados que tienen aislamiento de clientes activado).
+  1. Asegúrate de que ambos dispositivos están conectados a la **misma red Wi-Fi** (ojo con redes de invitados con aislamiento de clientes activado).
   2. En UxPlay Desktop, ve al panel principal y mira la tarjeta **Descubrimiento en Red (Apple Bonjour)**. Si dice *Detenido* o *Roto*, pulsa el botón **"Reparar / Iniciar Bonjour"** para que lo configure automáticamente como Administrador.
 - **¿El audio va ligeramente desfasado con el vídeo?**
   - Ve a la pestaña **Ajustes > Ajustes de Audio** y mueve el control deslizante **Calibración de Sincronización** (por ejemplo `+100 ms` o `-100 ms`) para compensar el retardo de auriculares Bluetooth.
@@ -89,13 +82,28 @@ Muchos profesionales, docentes y usuarios que comparten la pantalla de su iPad o
 
 Para desarrolladores y colaboradores interesados en la arquitectura técnica y el diseño interno:
 
+```mermaid
+graph TD
+    subgraph Dispositivo Apple
+        A[iPad / iPhone / Mac] -->|mDNS DNS-SD _airplay._tcp| B(Bonjour Daemon port 5353)
+        A -->|RTSP Handshake port 7000/7100| C[Motor Nativo UxPlay Core]
+        A -->|H.264 / H.265 Stream| D[GStreamer Media Pipeline]
+        A -->|ALAC / AAC Audio| E[WASAPI Audio Sink]
+    end
+
+    subgraph Host PC Windows
+        C -->|d3d11videosink / d3d12videosink| F[Direct3D Hardware Swapchain]
+        F --> G[DirectX Borderless Surface]
+        H[UxPlayDesktop.exe C# WPF UI] -->|Job Object Process Safety| C
+        H -->|Stdout / Stderr Regex Parser| I[Métricas de HUD en Vivo y Logs]
+        H -->|Win32 SetThreadExecutionState| J[Subsistema de Energía de Windows]
+    end
+```
+
 ### 1. Protocolo AirPlay y Motor Nativo
 * **Núcleo:** Basado en la rama activa master de [`FDH2/UxPlay`](https://github.com/FDH2/UxPlay) (versión 1.74).
 * **Criptografía FairPlay y Handshake:** Resuelve los intercambios de claves de iOS/iPadOS 17/18/19 mediante negociación RTSP (puertos TCP 7000/7100).
-* **Eliminación de D-Bus en Windows:** La versión original de Linux usa D-Bus para el salvapantallas (lo que crashea en Windows con `-scrsv`). UxPlay Desktop intercepta la gestión de energía mediante la API nativa de Windows:
-  ```csharp
-  SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED);
-  ```
+* **Eliminación de D-Bus en Windows:** La versión original de Linux usa D-Bus para el salvapantallas. UxPlay Desktop intercepta la gestión de energía mediante la API nativa de Windows `SetThreadExecutionState`.
 
 ### 2. Pipeline de Vídeo Direct3D en GStreamer
 * Decodificación acelerada por GPU mediante **Direct3D 11 (`d3d11videosink`)** y Direct3D 12.
@@ -103,8 +111,12 @@ Para desarrolladores y colaboradores interesados en la arquitectura técnica y e
 * Renderizado zero-copy de memoria GPU con consumo de CPU inferior al 3% en procesadores multinúcleo.
 
 ### 3. Seguridad de Procesos con Job Objects de Windows
-* Los subprocesos nativos (`uxplay.exe` y beacons Bluetooth LE) están asignados a un **Job Object** de Windows con el flag `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`.
-* Incluso si la interfaz WPF se cierra forzosamente o cae, el kernel de Windows liquida todos los procesos hijos de forma atómica, evitando procesos zombie o puertos bloqueados.
+* Los subprocesos nativos (`uxplay.exe` y balizas Bluetooth LE) están asignados a un **Job Object** de Windows con el flag `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`.
+* Si la interfaz WPF se cierra o cae, el kernel de Windows liquida todos los procesos hijos de forma atómica, evitando procesos zombie o puertos bloqueados.
+
+### 4. Recuperación y Reparación Automática de Apple Bonjour
+* UxPlay se comunica con la biblioteca `dnssd.dll` de Apple.
+* Si instalaciones previas de otros programas dejaron un servicio corrupto o huérfano, el motor de diagnóstico reinstala y registra limpiamente `mDNSResponder.exe` en `C:\Program Files\Bonjour`, abriendo automáticamente los puertos UDP 5353 y TCP 7000-7100 en el Firewall de Windows.
 
 ---
 
