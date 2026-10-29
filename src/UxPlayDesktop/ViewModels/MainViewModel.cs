@@ -46,11 +46,14 @@ public class MainViewModel : ViewModelBase
             if (SetField(ref _serverState, value))
             {
                 OnPropertyChanged(nameof(StatusTitle));
+                OnPropertyChanged(nameof(StatusSubtitle));
                 OnPropertyChanged(nameof(StatusDescription));
                 OnPropertyChanged(nameof(StatusColor));
                 OnPropertyChanged(nameof(IsServerRunning));
                 OnPropertyChanged(nameof(StartStopButtonText));
                 OnPropertyChanged(nameof(StartStopButtonIcon));
+                OnPropertyChanged(nameof(DisplayClientName));
+                OnPropertyChanged(nameof(DisplayClientIp));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -79,9 +82,15 @@ public class MainViewModel : ViewModelBase
                 Loc.SetLanguage(value.Code);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(StatusTitle));
+                OnPropertyChanged(nameof(StatusSubtitle));
                 OnPropertyChanged(nameof(StatusDescription));
                 OnPropertyChanged(nameof(StartStopButtonText));
                 OnPropertyChanged(nameof(PresetDescription));
+                OnPropertyChanged(nameof(DisplayClientName));
+                OnPropertyChanged(nameof(DisplayClientIp));
+                OnPropertyChanged(nameof(DisplayTargetFps));
+                OnPropertyChanged(nameof(DisplayAudioDelay));
+                OnPropertyChanged(nameof(DisplayStep3Desc));
                 _settingsService.Save(Settings);
             }
         }
@@ -104,6 +113,18 @@ public class MainViewModel : ViewModelBase
         _ => "Idle"
     };
 
+    public string StatusSubtitle => ServerState switch
+    {
+        ServerState.Stopped => Loc["ServerStoppedDesc"],
+        ServerState.Starting => Loc["StartingEngineDesc"],
+        ServerState.Listening => Loc["ReadyToConnectSummary"],
+        ServerState.Connecting => Loc["StartingEngineDesc"],
+        ServerState.Streaming => $"{Session.ActiveResolution} • {FormattedDuration}",
+        ServerState.Stopping => Loc["StoppingServerDesc"],
+        ServerState.Error => Loc["ServerErrorDesc"],
+        _ => string.Empty
+    };
+
     public string StatusDescription => ServerState switch
     {
         ServerState.Stopped => Loc["ServerStoppedDesc"],
@@ -115,6 +136,13 @@ public class MainViewModel : ViewModelBase
         ServerState.Error => Loc["ServerErrorDesc"],
         _ => string.Empty
     };
+
+    public string DisplayClientName => string.IsNullOrWhiteSpace(Session.ClientName) ? Loc["NoDevice"] : Session.ClientName;
+    public string DisplayClientIp => string.IsNullOrWhiteSpace(Session.ClientIpAddress) ? Loc["WaitingConnection"] : Session.ClientIpAddress;
+    public string DisplayTargetFps => string.Format(Loc["TargetFpsFormat"], Settings.TargetFps);
+    public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
+    public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
+    public string AppVersionDisplay => "UxPlay Desktop v1.1.2";
 
     public string StatusColor => ServerState switch
     {
@@ -227,9 +255,15 @@ public class MainViewModel : ViewModelBase
         Loc.PropertyChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(StatusTitle));
+            OnPropertyChanged(nameof(StatusSubtitle));
             OnPropertyChanged(nameof(StatusDescription));
             OnPropertyChanged(nameof(StartStopButtonText));
             OnPropertyChanged(nameof(PresetDescription));
+            OnPropertyChanged(nameof(DisplayClientName));
+            OnPropertyChanged(nameof(DisplayClientIp));
+            OnPropertyChanged(nameof(DisplayTargetFps));
+            OnPropertyChanged(nameof(DisplayAudioDelay));
+            OnPropertyChanged(nameof(DisplayStep3Desc));
             OnPropertyChanged(nameof(SelectedLanguage));
         };
 
@@ -338,6 +372,11 @@ public class MainViewModel : ViewModelBase
     {
         _settingsService.Save(Settings);
         _autostartService.SetAutostart(Settings.StartOnBoot);
+        OnPropertyChanged(nameof(DisplayTargetFps));
+        OnPropertyChanged(nameof(DisplayAudioDelay));
+        OnPropertyChanged(nameof(DisplayStep3Desc));
+        OnPropertyChanged(nameof(StatusDescription));
+        OnPropertyChanged(nameof(StatusSubtitle));
     }
 
     private void CheckBonjourStatus()
@@ -356,7 +395,10 @@ public class MainViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(Session));
         OnPropertyChanged(nameof(StatusTitle));
+        OnPropertyChanged(nameof(StatusSubtitle));
         OnPropertyChanged(nameof(StatusDescription));
+        OnPropertyChanged(nameof(DisplayClientName));
+        OnPropertyChanged(nameof(DisplayClientIp));
     }
 
     private void UpdateDuration()

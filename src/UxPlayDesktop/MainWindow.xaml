@@ -8,8 +8,8 @@
         mc:Ignorable="d"
         Title="UxPlay Desktop - AirPlay Mirroring"
         Icon="resources/newicon.ico"
-        Height="720" Width="960"
-        MinHeight="600" MinWidth="800"
+        Height="740" Width="1020"
+        MinHeight="620" MinWidth="860"
         Background="{StaticResource AppBackgroundBrush}"
         WindowStartupLocation="CenterScreen">
 
@@ -38,7 +38,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="UxPlay Desktop" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,10,0" />
                             <Border Background="#2B3A4A" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                <TextBlock Text="Windows AirPlay" FontSize="11" Foreground="#6EA8FE" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Loc[WindowsAirPlay]}" FontSize="11" Foreground="#6EA8FE" FontWeight="SemiBold" />
                             </Border>
                         </StackPanel>
                         <!-- Status subtitle with colored dot -->
@@ -46,7 +46,7 @@
                             <Ellipse Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" Fill="{Binding StatusColor}" />
                             <TextBlock Text="{Binding StatusTitle}" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,8,0" />
                             <TextBlock Text="•" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,8,0" />
-                            <TextBlock Text="{Binding StatusDescription}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
+                            <TextBlock Text="{Binding StatusSubtitle}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis" MaxWidth="340" ToolTip="{Binding StatusDescription}" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -153,11 +153,69 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="🔐 AirPlay Pairing PIN Requested" FontWeight="Bold" FontSize="15" Foreground="#FFD54F" />
-                                    <TextBlock Text="Enter the following 4-digit code on your Apple device to authorize connection:" Foreground="#FFF9C4" Margin="0,4,0,8" />
+                                    <TextBlock Text="{Binding Loc[PinRequestedTitle]}" FontWeight="Bold" FontSize="15" Foreground="#FFD54F" />
+                                    <TextBlock Text="{Binding Loc[PinRequestedDesc]}" Foreground="#FFF9C4" Margin="0,4,0,8" />
                                     <TextBlock Text="{Binding ActivePinCode}" FontSize="36" FontWeight="Bold" Foreground="#FFE082" />
                                 </StackPanel>
-                                <Button Grid.Column="1" Content="Dismiss" Command="{Binding DismissPinCommand}" Style="{StaticResource SecondaryButtonStyle}" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Content="{Binding Loc[PinDismiss]}" Command="{Binding DismissPinCommand}" Style="{StaticResource SecondaryButtonStyle}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- AIRPLAY CONNECTION GUIDE CARD -->
+                        <Border Background="#16202C" BorderBrush="#2563EB" BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,16">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="📲 " FontSize="16" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Loc[AirPlayGuideTitle]}" FontSize="14" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <Border Grid.Column="1" Background="#1E3A8A" CornerRadius="4" Padding="8,3" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Settings.ServerName, StringFormat='AirPlay: {0}'}" FontSize="11" Foreground="#BFDBFE" FontWeight="SemiBold" />
+                                    </Border>
+                                </Grid>
+
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Step 1 -->
+                                    <Border Grid.Column="0" Background="#0F172A" CornerRadius="6" Padding="12,10" Margin="0,0,8,0">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Loc[Step1Title]}" FontSize="10" FontWeight="Bold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                                            <TextBlock Text="{Binding Loc[Step1Desc]}" FontSize="12" Foreground="White" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Step 2 -->
+                                    <Border Grid.Column="1" Background="#0F172A" CornerRadius="6" Padding="12,10" Margin="0,0,8,0">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Loc[Step2Title]}" FontSize="10" FontWeight="Bold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                                            <TextBlock Text="{Binding Loc[Step2Desc]}" FontSize="12" Foreground="White" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Step 3 -->
+                                    <Border Grid.Column="2" Background="#0F172A" CornerRadius="6" Padding="12,10">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Loc[Step3Title]}" FontSize="10" FontWeight="Bold" Foreground="#94A3B8" Margin="0,0,0,4" />
+                                            <TextBlock Text="{Binding DisplayStep3Desc}" FontSize="12" Foreground="#38BDF8" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
                             </Grid>
                         </Border>
 
@@ -172,7 +230,7 @@
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
                                     <TextBlock Text="{Binding Loc[MetricsTitle]}" FontSize="15" FontWeight="SemiBold" Foreground="White" />
                                     <Border Background="#1A3320" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="ACTIVE HUD" FontSize="10" Foreground="#25D366" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding Loc[ActiveHud]}" FontSize="10" Foreground="#25D366" FontWeight="Bold" />
                                     </Border>
                                 </StackPanel>
 
@@ -188,8 +246,8 @@
                                     <Border Grid.Column="0" Background="#1D1D1D" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                                         <StackPanel>
                                             <TextBlock Text="{Binding Loc[ConnectedDevice]}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
-                                            <TextBlock Text="{Binding Session.ClientName, TargetNullValue='No Device'}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding Session.ClientIpAddress, TargetNullValue='Waiting...'}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                                            <TextBlock Text="{Binding DisplayClientName}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding DisplayClientIp}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                                         </StackPanel>
                                     </Border>
 
@@ -207,7 +265,7 @@
                                         <StackPanel>
                                             <TextBlock Text="{Binding Loc[Framerate]}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding Session.ActiveCodec}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" />
-                                            <TextBlock Text="{Binding Settings.TargetFps, StringFormat='Target: {0} FPS'}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                                            <TextBlock Text="{Binding DisplayTargetFps}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                                         </StackPanel>
                                     </Border>
 
@@ -302,8 +360,8 @@
                                 <CheckBox Content="{Binding Loc[StartWithWindowsLabel]}" IsChecked="{Binding Settings.StartOnBoot}" Margin="0,0,0,8" />
                                 <CheckBox Content="{Binding Loc[MinimizeToTrayLabel]}" IsChecked="{Binding Settings.MinimizeToTray}" Margin="0,0,0,8" />
                                 <CheckBox Content="{Binding Loc[AutoStartServerLabel]}" IsChecked="{Binding Settings.AutoStartServer}" Margin="0,0,0,8" />
-                                <CheckBox Content="Inhibit sleep and screensaver while presenting or mirroring" IsChecked="{Binding Settings.InhibitSleepAndScreensaver}" Margin="0,0,0,8" />
-                                <CheckBox Content="Enable Bluetooth Low Energy (BLE) beacon for instant Apple discovery" IsChecked="{Binding Settings.EnableBluetoothBeacon}" Margin="0,0,0,4" />
+                                <CheckBox Content="{Binding Loc[InhibitSleepLabel]}" IsChecked="{Binding Settings.InhibitSleepAndScreensaver}" Margin="0,0,0,8" />
+                                <CheckBox Content="{Binding Loc[EnableBleLabel]}" IsChecked="{Binding Settings.EnableBluetoothBeacon}" Margin="0,0,0,4" />
                             </StackPanel>
                         </Border>
 
@@ -319,12 +377,12 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                        <TextBlock Text="Target Resolution Width" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding Loc[TargetWidthLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                         <TextBox Text="{Binding Settings.DisplayWidth}" />
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1">
-                                        <TextBlock Text="Target Resolution Height" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding Loc[TargetHeightLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                         <TextBox Text="{Binding Settings.DisplayHeight}" />
                                     </StackPanel>
                                 </Grid>
@@ -347,7 +405,7 @@
                                 </Grid>
 
                                 <CheckBox Content="{Binding Loc[EnableH265Label]}" IsChecked="{Binding Settings.EnableH265}" Margin="0,0,0,8" />
-                                <CheckBox Content="Force Fullscreen display mode (Alt+Enter toggles)" IsChecked="{Binding Settings.ForceFullscreen}" Margin="0,0,0,8" />
+                                <CheckBox Content="{Binding Loc[ForceFullscreenLabel]}" IsChecked="{Binding Settings.ForceFullscreen}" Margin="0,0,0,8" />
                                 <CheckBox Content="{Binding Loc[BorderlessLabel]}" IsChecked="{Binding Settings.BorderlessWindow}" Margin="0,0,0,4" />
                             </StackPanel>
                         </Border>
@@ -362,7 +420,7 @@
                                 <TextBlock Text="{Binding Loc[FixedPinLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                 <TextBox Text="{Binding Settings.FixedPin}" MaxLength="4" Margin="0,0,0,12" />
 
-                                <TextBlock Text="Optional Password (Optional legacy AirPlay password):" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding Loc[PasswordLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                 <TextBox Text="{Binding Settings.Password}" Margin="0,0,0,4" />
                             </StackPanel>
                         </Border>
@@ -374,7 +432,7 @@
 
                                 <CheckBox Content="{Binding Loc[EnableAudioLabel]}" IsChecked="{Binding Settings.EnableAudio}" Margin="0,0,0,10" />
 
-                                <TextBlock Text="{Binding Settings.AudioDelayMs, StringFormat='Audio Sync Delay: {0} ms'}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding DisplayAudioDelay}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                 <Slider Minimum="-500" Maximum="500" Value="{Binding Settings.AudioDelayMs}" TickFrequency="50" IsSnapToTickEnabled="True" Margin="0,0,0,8" />
                                 <TextBlock Text="{Binding Loc[AudioDelayLabel]}" Foreground="{StaticResource TextMutedBrush}" FontSize="11" />
                             </StackPanel>
@@ -411,7 +469,7 @@
                             <!-- Search Filter -->
                             <TextBox Grid.Column="0"
                                      Text="{Binding Logs.SearchFilter, UpdateSourceTrigger=PropertyChanged}"
-                                     ToolTip="Type to filter log messages..."
+                                     ToolTip="{Binding Loc[LogsFilterTooltip]}"
                                      Margin="0,0,10,0" />
 
                             <Button Grid.Column="1"
@@ -463,13 +521,13 @@
                         <TextBlock Text="UxPlay Desktop for Windows" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,6" />
                         <TextBlock Text="{Binding Loc[AboutSubtitle]}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,16" />
 
-                        <TextBlock Text="Created for educators, online streamers, and presentation hosts to deliver seamless iPad / iPhone screen mirroring to Windows PCs with zero technical friction." Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,16" />
+                        <TextBlock Text="{Binding Loc[AboutDesc]}" Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,16" />
 
-                        <TextBlock Text="Engine &amp; Core Architecture:" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4" />
-                        <TextBlock Text="• Upstream FDH2/UxPlay master core with modern iPadOS handshake reliability" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
-                        <TextBlock Text="• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
-                        <TextBlock Text="• Automatic keyframe synchronization &amp; deferred state transitions" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
-                        <TextBlock Text="• Windows power request display inhibitor to prevent sleep during lectures" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16" />
+                        <TextBlock Text="{Binding Loc[AboutArchTitle]}" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4" />
+                        <TextBlock Text="{Binding Loc[AboutBullet1]}" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding Loc[AboutBullet2]}" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding Loc[AboutBullet3]}" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding Loc[AboutBullet4]}" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16" />
 
                         <TextBlock Text="{Binding Loc[AboutAuthor]}" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4" />
                         <TextBlock Text="GitHub: https://github.com/jorjanion/uxplay-desktop" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,2" />
@@ -488,8 +546,8 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" Text="{Binding StatusDescription}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="1" Text="UxPlay Desktop v1.1.0" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="0" Text="{Binding StatusDescription}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,16,0" />
+                <TextBlock Grid.Column="1" Text="{Binding AppVersionDisplay}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
             </Grid>
         </Border>
     </Grid>
