@@ -2,7 +2,7 @@
 ; High-performance, self-contained Windows AirPlay installer
 
 #define MyAppName "UxPlay Desktop"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 #define MyAppPublisher "Jorge Paris"
 #define MyAppURL "https://github.com/jorjanion/uxplay-desktop"
 #define MyAppExeName "UxPlayDesktop.exe"
