@@ -142,7 +142,7 @@ public class MainViewModel : ViewModelBase
     public string DisplayTargetFps => string.Format(Loc["TargetFpsFormat"], Settings.TargetFps);
     public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
     public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
-    public string AppVersionDisplay => "UxPlay Desktop v1.1.2";
+    public string AppVersionDisplay => "UxPlay Desktop v1.1.3";
 
     public string StatusColor => ServerState switch
     {

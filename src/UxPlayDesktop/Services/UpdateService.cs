@@ -153,11 +153,21 @@ public class UpdateService : IUpdateService
 
             if (isExe)
             {
-                // Direct installer update: run installer and exit
+                // Cleanly kill native engine process prior to running update
+                try
+                {
+                    foreach (var proc in Process.GetProcessesByName("uxplay"))
+                    {
+                        proc.Kill(true);
+                    }
+                }
+                catch { }
+
+                // Direct installer update: run installer with force close and exit
                 var psi = new ProcessStartInfo
                 {
                     FileName = downloadedFile,
-                    Arguments = "/SILENT /CLOSEAPPLICATIONS",
+                    Arguments = "/SILENT /FORCECLOSEAPPLICATIONS",
                     UseShellExecute = true,
                     Verb = "runas"
                 };

@@ -17,7 +17,7 @@
 ---
 
 ### 🌐 Read this documentation in your language:
-[🇪🇸 Español](README.es.md) • [🇺🇸 English](README.md) • [🇫🇷 Français](README.fr.md) • [🇩🇪 Deutsch](README.de.md) • [🇮🇹 Italiano](README.it.md) • [🇧🇷 Português (Brasil)](README.pt.md) • [🇷🇺 Русский](README.ru.md) • [🇵🇱 Polski](README.pl.md) • [🇳🇱 Nederlands](README.nl.md) • [🇺🇦 Українська](README.uk.md) • [🇨🇳 简体中文](README.zh-CN.md) • [🇯🇵 日本語](README.ja.md)
+[🇪🇸 Español](docs/locales/README.es.md) • [🇺🇸 English](README.md) • [🇫🇷 Français](docs/locales/README.fr.md) • [🇩🇪 Deutsch](docs/locales/README.de.md) • [🇮🇹 Italiano](docs/locales/README.it.md) • [🇧🇷 Português (Brasil)](docs/locales/README.pt.md) • [🇷🇺 Русский](docs/locales/README.ru.md) • [🇵🇱 Polski](docs/locales/README.pl.md) • [🇳🇱 Nederlands](docs/locales/README.nl.md) • [🇺🇦 Українська](docs/locales/README.uk.md) • [🇨🇳 简体中文](docs/locales/README.zh-CN.md) • [🇯🇵 日本語](docs/locales/README.ja.md)
 
 ---
 

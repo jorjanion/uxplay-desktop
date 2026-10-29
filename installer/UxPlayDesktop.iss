@@ -2,7 +2,7 @@
 ; High-performance, self-contained Windows AirPlay installer
 
 #define MyAppName "UxPlay Desktop"
-#define MyAppVersion "1.1.2"
+#define MyAppVersion "1.1.3"
 #define MyAppPublisher "jorjanion"
 #define MyAppURL "https://github.com/jorjanion/uxplay-desktop"
 #define MyAppExeName "UxPlayDesktop.exe"
@@ -29,8 +29,9 @@ PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
 UninstallDisplayIcon={app}\{#MyAppExeName}
-CloseApplications=yes
+CloseApplications=force
 RestartApplications=no
+CloseApplicationsFilter=*.exe,*.dll
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -78,7 +79,32 @@ Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 [Run]
 ; Automatically configure Bonjour Service and open Windows Firewall ports for AirPlay
 Filename: "{app}\fix_bonjour.bat"; Parameters: "/silent"; Flags: runhidden waituntilterminated
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+; Launch in normal interactive mode (pre-checked checkbox on finish page)
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall; Check: not WizardSilent
+; Automatically launch when updated or installed silently without requiring user interaction
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait; Check: WizardSilent
 
 [UninstallRun]
 Filename: "sc.exe"; Parameters: "stop ""Bonjour Service"""; Flags: runhidden
+
+[Code]
+function InitializeSetup(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := True;
+  // Silently terminate any running instances before installation begins
+  Exec('taskkill.exe', '/F /IM UxPlayDesktop.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/F /IM uxplay.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+function InitializeUninstall(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := True;
+  // Silently terminate running instances before uninstallation
+  Exec('taskkill.exe', '/F /IM UxPlayDesktop.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/F /IM uxplay.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
