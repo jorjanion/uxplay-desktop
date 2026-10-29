@@ -379,6 +379,7 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         {
             string[] gstCandidates =
             [
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "uxplay-windows"),
                 @"C:\msys64\ucrt64\bin",
                 @"C:\msys64\mingw64\bin",
                 @"C:\gstreamer\1.0\msvc_x86_64\bin",
