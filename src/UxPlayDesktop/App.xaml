@@ -258,5 +258,74 @@
             <Setter Property="Margin" Value="0,4" />
         </Style>
 
+        <!-- Modern Dark ContextMenu -->
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="#222222" />
+            <Setter Property="BorderBrush" Value="#444444" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="#222222"
+                                BorderBrush="#444444"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="4">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="4" Opacity="0.5" />
+                            </Border.Effect>
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Dark MenuItem -->
+        <Style TargetType="MenuItem">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="menuItemBorder"
+                                Background="Transparent"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}"
+                                Margin="2,1">
+                            <ContentPresenter ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="menuItemBorder" Property="Background" Value="#383838" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Dark Separator -->
+        <Style TargetType="Separator">
+            <Setter Property="Margin" Value="4,4" />
+            <Setter Property="Height" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Separator">
+                        <Rectangle Height="1" Fill="#3A3A3A" Margin="4,3" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Application.Resources>
 </Application>

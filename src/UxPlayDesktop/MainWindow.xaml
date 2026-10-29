@@ -530,7 +530,15 @@
                         <TextBlock Text="{Binding Loc[AboutBullet4]}" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16" />
 
                         <TextBlock Text="{Binding Loc[AboutAuthor]}" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4" />
-                        <TextBlock Text="GitHub: https://github.com/jorjanion/uxplay-desktop" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,2" />
+                        <TextBlock Margin="0,0,0,4">
+                            <Run Text="GitHub: " Foreground="{StaticResource TextSecondaryBrush}" />
+                            <Hyperlink NavigateUri="https://github.com/jorjanion/uxplay-desktop"
+                                       RequestNavigate="Hyperlink_RequestNavigate"
+                                       Foreground="{StaticResource AccentBrush}"
+                                       Cursor="Hand">
+                                https://github.com/jorjanion/uxplay-desktop
+                            </Hyperlink>
+                        </TextBlock>
                         <TextBlock Text="License: GNU General Public License v3.0 (GPL-3.0)" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16" />
                     </StackPanel>
                 </Border>

@@ -240,6 +240,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "Open UxPlay Desktop",
+            ["TrayExit"] = "Exit",
         };
 
         // 2. SPANISH (Español)
@@ -358,6 +360,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Renderizado acelerado por hardware Direct3D 11/12 mediante GStreamer",
             ["AboutBullet3"] = "• Sincronización continua de fotogramas clave y transición diferida de estados",
             ["AboutBullet4"] = "• Inhibición nativa de suspensión de pantalla de Windows para evitar apagados durante clases",
+            ["TrayRestore"] = "Abrir UxPlay Desktop",
+            ["TrayExit"] = "Salir",
         };
 
         // 3. FRENCH (Français)
@@ -476,6 +480,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Rendu Direct3D 11/12 accéléré par GPU via GStreamer",
             ["AboutBullet3"] = "• Synchronisation automatique des images clés",
             ["AboutBullet4"] = "• Inhibiteur de veille Windows pour éviter l'extinction d'écran",
+            ["TrayRestore"] = "Ouvrir UxPlay Desktop",
+            ["TrayExit"] = "Quitter",
         };
 
         // 4. GERMAN (Deutsch)
@@ -594,6 +600,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardwarebeschleunigtes Direct3D 11/12-Rendering via GStreamer",
             ["AboutBullet3"] = "• Automatische Keyframe-Synchronisation",
             ["AboutBullet4"] = "• Windows-Energieanforderungs-Inhibitor gegen Standby",
+            ["TrayRestore"] = "UxPlay Desktop Öffnen",
+            ["TrayExit"] = "Beenden",
         };
 
         // 5. ITALIAN (Italiano)
@@ -712,6 +720,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "Apri UxPlay Desktop",
+            ["TrayExit"] = "Esci",
         };
 
         // 6. PORTUGUESE (Brasil & América)
@@ -830,6 +840,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "Abrir UxPlay Desktop",
+            ["TrayExit"] = "Sair",
         };
         _translations["pt-PT"] = _translations["pt-BR"];
 
@@ -949,6 +961,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "Открыть UxPlay Desktop",
+            ["TrayExit"] = "Выход",
         };
 
         // 8. CHINESE (Simplified - 简体中文)
@@ -1067,6 +1081,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "打开 UxPlay Desktop",
+            ["TrayExit"] = "退出",
         };
 
         // 9. JAPANESE (日本語)
@@ -1185,6 +1201,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "UxPlay Desktop を開く",
+            ["TrayExit"] = "終了",
         };
 
         // 10. POLISH, DUTCH, UKRAINIAN, SWEDISH, KOREAN aliases & definitions
@@ -1232,6 +1250,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "Otwórz UxPlay Desktop",
+            ["TrayExit"] = "Wyjdź",
         };
 
         _translations["nl"] = new Dictionary<string, string>(_translations["en"])
@@ -1278,6 +1298,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "UxPlay Desktop Openen",
+            ["TrayExit"] = "Afsluiten",
         };
 
         _translations["uk"] = new Dictionary<string, string>(_translations["ru"])
@@ -1324,6 +1346,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "Відкрити UxPlay Desktop",
+            ["TrayExit"] = "Вийти",
         };
 
         _translations["sv"] = new Dictionary<string, string>(_translations["en"])
@@ -1367,6 +1391,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "Öppna UxPlay Desktop",
+            ["TrayExit"] = "Avsluta",
         };
 
         _translations["ko"] = new Dictionary<string, string>(_translations["ja"])
@@ -1412,6 +1438,8 @@ public class LocalizationService : ILocalizationService
             ["AboutBullet2"] = "• Hardware-accelerated Direct3D 11/12 video rendering via GStreamer",
             ["AboutBullet3"] = "• Automatic keyframe synchronization & deferred state transitions",
             ["AboutBullet4"] = "• Windows power request display inhibitor to prevent sleep during lectures",
+            ["TrayRestore"] = "UxPlay Desktop 열기",
+            ["TrayExit"] = "종료",
         };
     }
 }

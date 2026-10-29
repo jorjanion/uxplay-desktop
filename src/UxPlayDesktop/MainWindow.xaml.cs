@@ -55,4 +55,18 @@ public partial class MainWindow : Window
             ShowInTaskbar = true;
         }
     }
+
+    private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = e.Uri.AbsoluteUri,
+                UseShellExecute = true
+            });
+        }
+        catch { }
+        e.Handled = true;
+    }
 }

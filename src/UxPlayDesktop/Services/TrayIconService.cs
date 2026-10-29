@@ -167,21 +167,39 @@ public class TrayIconService : ITrayIconService
     {
         if (_window == null || _viewModel == null) return;
 
-        var menu = new ContextMenu();
+        var darkBg = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 30, 30));
+        var darkBorder = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(60, 60, 60));
+        var sepBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(50, 50, 50));
+
+        var menu = new ContextMenu
+        {
+            Background = darkBg,
+            BorderBrush = darkBorder,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(4)
+        };
 
         var headerItem = new MenuItem
         {
             Header = "UxPlay Desktop",
-            FontWeight = FontWeights.Bold
+            FontWeight = FontWeights.Bold,
+            Foreground = System.Windows.Media.Brushes.White,
+            Padding = new Thickness(12, 6, 12, 6)
         };
         headerItem.Click += (_, _) => RestoreWindow();
         menu.Items.Add(headerItem);
 
-        menu.Items.Add(new Separator());
+        menu.Items.Add(new Separator
+        {
+            Margin = new Thickness(4, 2, 4, 2),
+            Background = sepBrush
+        });
 
         var toggleItem = new MenuItem
         {
-            Header = _viewModel.IsServerRunning ? "Stop AirPlay Server" : "Start AirPlay Server"
+            Header = _viewModel.IsServerRunning ? _viewModel.Loc["StopServer"] : _viewModel.Loc["StartServer"],
+            Foreground = System.Windows.Media.Brushes.White,
+            Padding = new Thickness(12, 6, 12, 6)
         };
         toggleItem.Click += (_, _) =>
         {
@@ -192,11 +210,26 @@ public class TrayIconService : ITrayIconService
         };
         menu.Items.Add(toggleItem);
 
-        menu.Items.Add(new Separator());
+        var restoreItem = new MenuItem
+        {
+            Header = _viewModel.Loc["TrayRestore"],
+            Foreground = System.Windows.Media.Brushes.White,
+            Padding = new Thickness(12, 6, 12, 6)
+        };
+        restoreItem.Click += (_, _) => RestoreWindow();
+        menu.Items.Add(restoreItem);
+
+        menu.Items.Add(new Separator
+        {
+            Margin = new Thickness(4, 2, 4, 2),
+            Background = sepBrush
+        });
 
         var exitItem = new MenuItem
         {
-            Header = "Exit"
+            Header = _viewModel.Loc["TrayExit"],
+            Foreground = System.Windows.Media.Brushes.White,
+            Padding = new Thickness(12, 6, 12, 6)
         };
         exitItem.Click += (_, _) =>
         {
