@@ -202,7 +202,6 @@ public class MainViewModel : ViewModelBase
 
     public ICommand ToggleServerCommand { get; }
     public ICommand SaveSettingsCommand { get; }
-    public ICommand CopyDiscordStreamNameCommand { get; }
     public ICommand FixBonjourCommand { get; }
     public ICommand DismissPinCommand { get; }
     public ICommand ApplyUpdateCommand { get; }
@@ -241,7 +240,6 @@ public class MainViewModel : ViewModelBase
 
         ToggleServerCommand = new RelayCommand(async () => await ToggleServerAsync());
         SaveSettingsCommand = new RelayCommand(SaveSettings);
-        CopyDiscordStreamNameCommand = new RelayCommand(CopyDiscordStreamName);
         FixBonjourCommand = new RelayCommand(FixBonjour);
         DismissPinCommand = new RelayCommand(() => ActivePinCode = null);
         ApplyUpdateCommand = new RelayCommand(async () => await ApplyUpdateAsync());
@@ -340,21 +338,6 @@ public class MainViewModel : ViewModelBase
     {
         _settingsService.Save(Settings);
         _autostartService.SetAutostart(Settings.StartOnBoot);
-    }
-
-    private void CopyDiscordStreamName()
-    {
-        try
-        {
-            // The renderer window title created by uxplay
-            Clipboard.SetText(Settings.ServerName);
-            MessageBox.Show(
-                $"Window name \"{Settings.ServerName}\" copied to clipboard!\n\nIn Discord: Share Screen > Screens or Applications > Select the AirPlay window.",
-                "Discord Streaming Helper",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-        catch { }
     }
 
     private void CheckBonjourStatus()

@@ -22,7 +22,7 @@ public class AppSettings
     public int TargetFps { get; set; } = 60;
     public bool EnableH265 { get; set; } = true;
     public bool ForceFullscreen { get; set; } = false;
-    public bool BorderlessWindow { get; set; } = true; // Preferred for Discord/OBS window capture
+    public bool BorderlessWindow { get; set; } = true; // Clean borderless display mode
     public string VideoSink { get; set; } = "d3d11videosink"; // d3d11videosink, d3d12videosink, autovideosink
 
     // Audio Configuration

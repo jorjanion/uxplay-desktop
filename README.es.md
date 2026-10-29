@@ -1,10 +1,6 @@
 # 📺 UxPlay Desktop (Español)
 
 <p align="center">
-  <img src="resources/defender.png" alt="UxPlay Desktop Banner" width="550" />
-</p>
-
-<p align="center">
   <strong>Cliente de duplicado de pantalla AirPlay moderno y de ultra-baja latencia para Windows</strong><br>
   <em>Convierte cualquier ordenador con Windows en un receptor AirPlay de alto rendimiento para iPad, iPhone y Mac.</em>
 </p>
@@ -27,7 +23,7 @@
 
 ## ⚡ ¿Por qué UxPlay Desktop?
 
-Muchos profesores particulares, formadores online y streamers que dan clase desde casa compartiendo la pantalla de su iPad en Discord o streaming se topan con problemas continuos:
+Muchos profesionales, docentes y usuarios que comparten la pantalla de su iPad o iPhone en presentaciones y reuniones se topan con problemas continuos:
 - **Las aplicaciones comerciales de AirPlay** exigen suscripciones mensuales caras, cuotas de renovación o estampan marcas de agua molestas en mitad de la pantalla.
 - **Otras herramientas libres antiguas** se congelan en el primer fotograma con las últimas versiones de iPadOS, requieren comandos técnicos raros por consola, sufren desincronización de audio o fallan por falta de librerías DLL y servicios de Linux.
 
@@ -35,7 +31,7 @@ Muchos profesores particulares, formadores online y streamers que dan clase desd
 - **📦 Instalador Nativo Directo (`.exe`):** Olvídate de descomprimir zips ni lidiar con carpetas. Descargas el instalador, pulsas Siguiente y te lo deja todo listo.
 - **🚀 100% Autónomo (Self-Contained):** No te pedirá descargar .NET ni componentes externos; incluye el motor de .NET 8, librerías C++ y plugins de GStreamer en su propio ejecutable.
 - **⚡ Aceleración Direct3D 11/12 por Hardware:** 60 FPS ultra fluidos, nitidez absoluta en los trazos de GoodNotes y Notability y latencia imperceptible.
-- **💬 Asistente para Discord y OBS Studio:** Modo ventana sin bordes optimizado para compartir tu pizarra directamente en los canales de voz de Discord o en OBS Studio sin cortes.
+- **🖼️ Modo Ventana sin Bordes:** Visualización limpia y optimizada para proyecciones y captura fluida de pantalla sin distracciones ni marcos molestos.
 - **🛡️ Reparación y Configuración Automática de Bonjour y Firewall:** Detecta servicios rotos de versiones antiguas, reconfigura Apple Bonjour en un clic y abre los puertos de red en el Firewall de Windows para que el iPad lo detecte al instante.
 - **🌍 Traducido a más de 15 idiomas:** Español, inglés, francés, alemán, portugués, ruso, chino, japonés y más, con cambio dinámico al instante.
 - **🔄 Actualizaciones en 1 Clic:** La app te avisa si hay una nueva versión y te la actualiza automáticamente con un solo clic.
@@ -44,7 +40,6 @@ Muchos profesores particulares, formadores online y streamers que dan clase desd
 
 ## 📖 Guía Rápida para Usuarios (Puesta en Marcha en 3 Pasos)
 
-No necesitas saber de programación ni tocar ninguna consola.
 
 ### Paso 1: Instalar el Programa
 1. Descarga el instalador **[`UxPlayDesktop-Setup.exe`](https://github.com/jorjanion/uxplay-desktop/releases/latest)** de la última versión.
@@ -67,18 +62,13 @@ No necesitas saber de programación ni tocar ninguna consola.
 4. Elige **"UxPlay Windows"** en la lista.
 5. ¡Listo! La pantalla de tu iPad aparecerá al instante en tu monitor a 60 FPS sin retraso.
 
-### Paso 4: Compartir en Discord u OBS Studio
-* **Discord:** Entra a un canal de voz > Pulsa **Comparte tu pantalla** > Elige la pestaña **Aplicaciones** > Selecciona **"UxPlay Windows"**.
-* **OBS Studio:** Añade una fuente de **Captura de Ventana** > Selecciona `[uxplay.exe]: UxPlay Windows` > Método de captura: *Windows 10 (1903 y superior)*.
-* *Consejo:* Pulsa el botón **"Copiar Nombre de Ventana"** en el panel principal para copiar el nombre exacto de la ventana en el portapapeles.
-
 ---
 
 ## 🎛️ Perfiles de Rendimiento (Presets Explicados)
 
 | Perfil | Recomendado para | ¿Qué hace? |
 | :--- | :--- | :--- |
-| **🎓 Clases y Presentaciones** *(Por defecto)* | Clases online, Discord, pizarra digital, diapositivas | Máxima nitidez de texto, aceleración Direct3D y bloqueo automático del salvapantallas para que la pantalla no se apague en clase. |
+| **🎓 Clases y Presentaciones** *(Por defecto)* | Docencia, presentaciones, pizarra digital y diapositivas | Máxima nitidez de texto, aceleración Direct3D y bloqueo automático del salvapantallas para que la pantalla no se apague en clase. |
 | **🎮 Baja Latencia y Juegos** | Dibujo rápido, juegos de iPad | Búfer reducido al mínimo para conseguir respuesta inmediata en cada trazo a 60 FPS. |
 | **🎬 Cine y Vídeo HD** | Películas, YouTube, multimedia | Búfer adaptativo contra tirones para reproducir vídeo sin artefactos. |
 | **🎵 Solo Audio** | Música, podcasts, Apple Music | Apaga el vídeo para ahorrar recursos y transmite audio ALAC de alta fidelidad. |
@@ -95,9 +85,9 @@ No necesitas saber de programación ni tocar ninguna consola.
 
 ---
 
-## 🔬 Arquitectura Técnica (Para Programadores y Curiosos)
+## 🔬 Arquitectura Técnica y Funcionamiento Interno
 
-Para desarrolladores y colaboradores que quieran entender las tripas del sistema:
+Para desarrolladores y colaboradores interesados en la arquitectura técnica y el diseño interno:
 
 ### 1. Protocolo AirPlay y Motor Nativo
 * **Núcleo:** Basado en la rama activa master de [`FDH2/UxPlay`](https://github.com/FDH2/UxPlay) (versión 1.74).
@@ -146,4 +136,4 @@ Antes de abrir una PR, ten en cuenta nuestra filosofía:
 
 * **UxPlay Desktop** está publicado bajo la licencia **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)**.
 * Basado en el excelente trabajo original de ingeniería inversa de **[FDH2/UxPlay](https://github.com/FDH2/UxPlay)**.
-* Diseñado y mantenido con ❤️ por **Jorge Paris**.
+* Diseñado y mantenido con ❤️ por **jorjanion**.

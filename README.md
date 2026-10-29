@@ -1,10 +1,6 @@
 # 📺 UxPlay Desktop
 
 <p align="center">
-  <img src="resources/defender.png" alt="UxPlay Desktop Banner" width="550" />
-</p>
-
-<p align="center">
   <strong>Modern, Ultra-Low-Latency AirPlay Mirroring Client for Windows</strong><br>
   <em>Turn your Windows PC into a high-performance Apple AirPlay display and audio receiver.</em>
 </p>
@@ -27,7 +23,7 @@
 
 ## ⚡ Why UxPlay Desktop?
 
-Many Windows users who teach online, stream, or give presentations with an iPad face frustrating issues:
+Many professionals, educators, and users who mirror an iPad or iPhone display for lectures, meetings, and presentations face frustrating issues:
 - **Commercial AirPlay apps** charge expensive recurring subscriptions or show intrusive watermarks.
 - **Older open-source tools** freeze on the first frame with recent iPadOS updates, require cumbersome command-line prompts, suffer from audio desync, or crash due to missing DLLs and D-Bus services.
 
@@ -35,16 +31,15 @@ Many Windows users who teach online, stream, or give presentations with an iPad 
 - **📦 1-Click Native Installer (`.exe`):** No dealing with zip files or manual extraction. Installs everything needed automatically.
 - **🚀 100% Self-Contained:** Zero external dependencies required. .NET 8 desktop runtime, C++ runtimes, and GStreamer plugins are embedded.
 - **⚡ Direct3D 11/12 Hardware Acceleration:** Ultra-fluid 60 FPS mirroring with crystal-clear text sharpness and sub-frame latency.
-- **💬 Discord & OBS Streaming Helper:** Borderless window capture optimized for sharing GoodNotes, Notability, Procreate, or slides directly into Discord voice channels and OBS Studio.
+- **🖼️ Borderless Window Mode:** Clean, distraction-free display surface optimized for presentation projection and clear screen sharing.
 - **🛡️ Automated Apple Bonjour & Firewall Configuration:** Automatically repairs dead or orphaned Bonjour services and opens AirPlay network ports.
 - **🌍 15+ Native Languages:** Fluent interface with live, seamless language switching.
 - **🔄 In-App Auto-Updates:** Detects new GitHub releases and updates cleanly in 1 click.
 
 ---
 
-## 📖 Guide for Non-Technical Users (Easy 3-Minute Setup)
+## 📖 Quick Start Guide (3-Step Setup)
 
-You don't need any programming or technical knowledge to use UxPlay Desktop.
 
 ### Step 1: Install the Application
 1. Download **[`UxPlayDesktop-Setup.exe`](https://github.com/jorjanion/uxplay-desktop/releases/latest)** from the latest release.
@@ -67,16 +62,11 @@ You don't need any programming or technical knowledge to use UxPlay Desktop.
 4. Select **"UxPlay Windows"** from the list.
 5. Your screen will instantly appear on your PC monitor in high-definition 60 FPS!
 
-### Step 4: Streaming to Discord or OBS Studio
-* **Discord:** Join a voice channel > Click **Share Your Screen** > Go to the **Applications / Windows** tab > Select **"UxPlay Windows"**.
-* **OBS Studio:** Add a new **Window Capture** source > Select `[uxplay.exe]: UxPlay Windows` > Set capture method to *Windows 10 (1903 and up)*.
-* *Tip:* Click **"Copy Window Name"** on the dashboard to copy the exact window title to your clipboard.
-
 ### Understanding Streaming Presets
 UxPlay Desktop comes with presets designed for specific tasks:
 | Preset | Best For | What it Does |
 | :--- | :--- | :--- |
-| **🎓 Teaching & Presentations** *(Default)* | Online classes, Discord, whiteboard notes, PowerPoint | Direct3D accelerated with maximum text clarity and automatic screensaver inhibition. |
+| **🎓 Teaching & Presentations** *(Default)* | Presentations, lectures, whiteboard notes, and slides | Direct3D accelerated with maximum text clarity and automatic screensaver inhibition. |
 | **🎮 Low Latency & Gaming** | Mobile gaming, drawing apps with immediate stylus response | Minimizes buffer latency for instantaneous 60 FPS feedback. |
 | **🎬 High Quality Cinema** | Movies, YouTube, video playback | Adaptive jitter buffer prevents video stutter or artifacts. |
 | **🎵 Audio Only** | Podcasts, Apple Music, Spotify | Streams pure lossless audio without opening a video window. |
@@ -93,9 +83,9 @@ UxPlay Desktop comes with presets designed for specific tasks:
 
 ---
 
-## 🔬 Technical Architecture (For Developers & Geeks)
+## 🔬 Technical Architecture & Internal Mechanics
 
-For contributors and curious engineers, here is how UxPlay Desktop works under the hood:
+For developers and contributors interested in the technical architecture and internal design:
 
 ```mermaid
 graph TD
@@ -166,4 +156,4 @@ Before submitting a PR, please review our contribution philosophy:
 
 * **UxPlay Desktop** is licensed under the **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)**.
 * Built upon the open-source native engine by **[FDH2/UxPlay](https://github.com/FDH2/UxPlay)**.
-* Developed and maintained with ❤️ by **Jorge Paris**.
+* Developed and maintained with ❤️ by **jorjanion**.

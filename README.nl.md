@@ -1,10 +1,6 @@
 # 📺 UxPlay Desktop (Nederlands)
 
 <p align="center">
-  <img src="resources/defender.png" alt="UxPlay Desktop Banner" width="550" />
-</p>
-
-<p align="center">
   <strong>Moderne AirPlay-schermspiegeling met ultralage latentie voor Windows</strong><br>
   <em>Verander elke Windows-pc in een hoogwaardige AirPlay-ontvanger voor iPad, iPhone en Mac.</em>
 </p>
@@ -21,7 +17,7 @@
 - **📦 1-Klik Native Installatieprogramma (.exe):** Geen gedoe meer met zip-bestanden. Alles wordt automatisch ingesteld.
 - **🚀 100% Zelfvoorzienend:** Geen externe downloads nodig (.NET 8 en runtime libraries zijn inbegrepen).
 - **⚡ Direct3D 11/12 Hardwareversnelling:** Vloeiende 60 FPS en haarscherpe tekst voor online onderwijs en streaming.
-- **💬 Discord & OBS Streaming Helper:** Randloos venster, geoptimaliseerd voor schermdeling in Discord-spraakkanalen en OBS.
+- **🖼️ Randloze Venstermodus:** Strakke weergave zonder afleiding voor presentaties en schermdeling.
 - **🛡️ Automatisch Bonjour- en Firewallherstel:** Lost mDNS-problemen automatisch op en configureert Windows Firewall.
 
 ---
@@ -31,11 +27,10 @@
 1. **Installeren:** Download en start **[`UxPlayDesktop-Setup.exe`](https://github.com/jorjanion/uxplay-desktop/releases/latest)**.
 2. **Start de server:** Open UxPlay Desktop en klik op **"AirPlay-server Starten"**.
 3. **Verbinden:** Open op uw iPad/iPhone het **Bedieningspaneel** > tik op **Synchrone weergave** > kies **"UxPlay Windows"**.
-4. **Delen op Discord:** Neem deel aan een spraakkanaal > Scherm delen > Kies **"UxPlay Windows"**.
 
 ---
 
 ## 📜 Licentie
 
 Gepubliceerd onder de **GNU General Public License v3.0 (GPL-3.0)**.
-Gemaakt door **Jorge Paris**.
+Gemaakt door **jorjanion**.

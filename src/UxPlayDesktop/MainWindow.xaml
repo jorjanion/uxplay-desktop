@@ -223,30 +223,6 @@
                             </Grid>
                         </Border>
 
-                        <!-- DISCORD & OBS STREAMING CARD -->
-                        <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16" Background="#202225" BorderBrush="#5865F2">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Column="0">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <TextBlock Text="💬 " FontSize="14" />
-                                        <TextBlock Text="{Binding Loc[DiscordHelperTitle]}" FontSize="14" FontWeight="Bold" Foreground="#5865F2" />
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding Loc[DiscordHelperDesc]}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap" />
-                                </StackPanel>
-
-                                <Button Grid.Column="1"
-                                        Command="{Binding CopyDiscordStreamNameCommand}"
-                                        Style="{StaticResource SecondaryButtonStyle}"
-                                        Content="{Binding Loc[CopyWindowName]}"
-                                        VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-
                         <!-- STREAMING PRESET SELECTOR -->
                         <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                             <StackPanel>
