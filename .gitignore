@@ -1,0 +1,43 @@
+# Old reference repository
+leapbtw-uxplay/
+
+# Build artifacts and binaries
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Bb]uild/
+artifacts/
+*.user
+*.userosv
+*.suo
+*.ide
+*.ncb
+*.opensdf
+*.sdf
+*.cache
+*.log
+
+# Visual Studio
+.vs/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+
+# WiX / Packaging
+.wix/
+*.wixobj
+*.wixpdb
+*.msi
+
+# GStreamer local cache
+.gstreamer/
+
+# macOS / OS metadata
+.DS_Store
+Thumbs.db
