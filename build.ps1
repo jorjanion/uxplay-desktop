@@ -144,6 +144,25 @@ switch ($Action) {
 
         $artifactDir = Join-Path $OutDir "artifacts"
         if (-not (Test-Path $artifactDir)) { New-Item -ItemType Directory -Force -Path $artifactDir | Out-Null }
+
+        # Compile native Windows Setup Installer if Inno Setup is installed
+        $isccCandidates = @(
+            "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+        )
+        $isccExe = $null
+        foreach ($cand in $isccCandidates) {
+            if (Test-Path $cand) { $isccExe = $cand; break }
+        }
+
+        if ($isccExe) {
+            Write-Host "Compiling native Windows Setup Installer (Inno Setup)..." -ForegroundColor Yellow
+            $issPath = Join-Path $ProjectRoot "installer\UxPlayDesktop.iss"
+            & $isccExe $issPath
+            Write-Host "Native Setup Installer created successfully." -ForegroundColor Green
+        }
+
         $zipPath = Join-Path $artifactDir "UxPlayDesktop-win-x64.zip"
         if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
 
@@ -151,8 +170,11 @@ switch ($Action) {
         Compress-Archive -Path "$publishDir\*" -DestinationPath $zipPath
 
         Write-Host "==========================================================" -ForegroundColor Green
-        Write-Host " Packaging complete! Artifact available at:" -ForegroundColor Green
-        Write-Host " $zipPath" -ForegroundColor White
+        Write-Host " Packaging complete! Artifacts available at:" -ForegroundColor Green
+        if ($isccExe) {
+            Write-Host " - Installer: $(Join-Path $artifactDir 'UxPlayDesktop-Setup.exe')" -ForegroundColor White
+        }
+        Write-Host " - Portable:  $zipPath" -ForegroundColor White
         Write-Host "==========================================================" -ForegroundColor Green
     }
 }

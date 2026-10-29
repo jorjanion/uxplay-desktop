@@ -70,6 +70,8 @@ public class MainViewModelTests
     {
         var tempFile = Path.Combine(Path.GetTempPath(), $"settings_{Guid.NewGuid()}.json");
         _settingsService = new SettingsService(tempFile);
+        _settingsService.CurrentSettings.Language = "en";
+        LocalizationService.Instance.SetLanguage("en");
         _processManager = new MockProcessManager();
         _bonjourService = new MockBonjourService();
         _autostartService = new MockAutostartService();
@@ -85,7 +87,7 @@ public class MainViewModelTests
         Assert.False(vm.IsServerRunning);
         Assert.Equal("Start AirPlay Server", vm.StartStopButtonText);
         Assert.Equal("▶", vm.StartStopButtonIcon);
-        Assert.Equal("Server Offline", vm.StatusTitle);
+        Assert.Equal("Server Stopped", vm.StatusTitle);
     }
 
     [Fact]
@@ -142,6 +144,19 @@ public class MainViewModelTests
 
         vm.DismissPinCommand.Execute(null);
         Assert.Null(vm.ActivePinCode);
+    }
+
+    [Fact]
+    public void MainViewModel_LanguageChange_UpdatesStrings()
+    {
+        var vm = new MainViewModel(_settingsService, _processManager, _bonjourService, _autostartService);
+        vm.SelectedLanguage = vm.Loc.SupportedLanguages.First(l => l.Code == "es");
+
+        Assert.Equal("Detener Servidor AirPlay", vm.Loc["StopServer"]);
+        Assert.Equal("Panel Principal", vm.Loc["TabDashboard"]);
+
+        vm.SelectedLanguage = vm.Loc.SupportedLanguages.First(l => l.Code == "fr");
+        Assert.Equal("Arrêter le Serveur AirPlay", vm.Loc["StopServer"]);
     }
 
     [Fact]

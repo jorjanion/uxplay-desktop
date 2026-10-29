@@ -58,33 +58,61 @@ public class MainViewModel : ViewModelBase
 
     public AirPlaySession Session => _processManager.CurrentSession;
     public LogsViewModel Logs { get; }
+    public ILocalizationService Loc => LocalizationService.Instance;
+
+    public LanguageItem SelectedLanguage
+    {
+        get
+        {
+            var code = Settings.Language ?? "auto";
+            foreach (var lang in Loc.SupportedLanguages)
+            {
+                if (lang.Code.Equals(code, StringComparison.OrdinalIgnoreCase)) return lang;
+            }
+            return Loc.SupportedLanguages[0];
+        }
+        set
+        {
+            if (value != null && Settings.Language != value.Code)
+            {
+                Settings.Language = value.Code;
+                Loc.SetLanguage(value.Code);
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(StatusTitle));
+                OnPropertyChanged(nameof(StatusDescription));
+                OnPropertyChanged(nameof(StartStopButtonText));
+                OnPropertyChanged(nameof(PresetDescription));
+                _settingsService.Save(Settings);
+            }
+        }
+    }
 
     public bool IsServerRunning => ServerState is ServerState.Listening or ServerState.Connecting or ServerState.Streaming;
 
-    public string StartStopButtonText => IsServerRunning ? "Stop AirPlay Server" : "Start AirPlay Server";
+    public string StartStopButtonText => IsServerRunning ? Loc["StopServer"] : Loc["StartServer"];
     public string StartStopButtonIcon => IsServerRunning ? "⏹" : "▶";
 
     public string StatusTitle => ServerState switch
     {
-        ServerState.Stopped => "Server Offline",
-        ServerState.Starting => "Starting Server...",
-        ServerState.Listening => "Ready to Connect",
-        ServerState.Connecting => "Connecting Device...",
-        ServerState.Streaming => $"Streaming: {Session.ClientName ?? "Apple Device"}",
-        ServerState.Stopping => "Stopping Server...",
-        ServerState.Error => "Engine Warning / Error",
+        ServerState.Stopped => Loc["ServerStopped"],
+        ServerState.Starting => Loc["StartingEngine"],
+        ServerState.Listening => Loc["ReadyToConnect"],
+        ServerState.Connecting => Loc["StartingEngine"],
+        ServerState.Streaming => string.Format(Loc["StreamingActiveDesc"], Session.ClientName ?? "Apple Device"),
+        ServerState.Stopping => Loc["StoppingServer"],
+        ServerState.Error => Loc["ServerError"],
         _ => "Idle"
     };
 
     public string StatusDescription => ServerState switch
     {
-        ServerState.Stopped => "Click Start to enable AirPlay screen mirroring from iPad or iPhone.",
-        ServerState.Starting => "Initializing video pipelines and mDNS discovery...",
-        ServerState.Listening => $"Open Control Center on your iPad/iPhone > Screen Mirroring > Select \"{Settings.ServerName}\".",
-        ServerState.Connecting => $"Handshake in progress with {Session.ClientIpAddress ?? "device"}...",
+        ServerState.Stopped => Loc["ServerStoppedDesc"],
+        ServerState.Starting => Loc["StartingEngineDesc"],
+        ServerState.Listening => string.Format(Loc["ReadyToConnectDesc"], Settings.ServerName),
+        ServerState.Connecting => $"Handshake with {Session.ClientIpAddress ?? "device"}...",
         ServerState.Streaming => $"{Session.ActiveResolution} @ {Session.ActiveCodec} • {FormattedDuration}",
-        ServerState.Stopping => "Releasing resources and closing ports...",
-        ServerState.Error => "Please check the Real-time Logs tab for detailed diagnostic information.",
+        ServerState.Stopping => Loc["StoppingServerDesc"],
+        ServerState.Error => Loc["ServerErrorDesc"],
         _ => string.Empty
     };
 
@@ -196,6 +224,16 @@ public class MainViewModel : ViewModelBase
         _settings = _settingsService.CurrentSettings;
         Logs = new LogsViewModel();
 
+        Loc.SetLanguage(_settings.Language);
+        Loc.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(StatusTitle));
+            OnPropertyChanged(nameof(StatusDescription));
+            OnPropertyChanged(nameof(StartStopButtonText));
+            OnPropertyChanged(nameof(PresetDescription));
+            OnPropertyChanged(nameof(SelectedLanguage));
+        };
+
         _processManager.StateChanged += state => RunOnUi(() => ServerState = state);
         _processManager.SessionUpdated += _ => RunOnUi(OnSessionUpdated);
         _processManager.LogReceived += entry => RunOnUi(() => Logs.AddEntry(entry));
@@ -234,7 +272,8 @@ public class MainViewModel : ViewModelBase
         if (!ok)
         {
             IsUpdating = false;
-            MessageBox.Show("Failed to download or apply update automatically. Please download the latest version from GitHub Releases.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            var details = !string.IsNullOrEmpty(_updateService.LastError) ? $"\n\nDetails: {_updateService.LastError}" : "";
+            MessageBox.Show($"Failed to download or apply update automatically.{details}\n\nPlease download the latest installer from GitHub Releases.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

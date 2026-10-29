@@ -6,6 +6,7 @@ public class AppSettings
 {
     // General
     public string ServerName { get; set; } = "UxPlay Windows";
+    public string Language { get; set; } = "auto";
     public bool StartOnBoot { get; set; } = false;
     public bool MinimizeToTray { get; set; } = true;
     public bool StartMinimized { get; set; } = false;

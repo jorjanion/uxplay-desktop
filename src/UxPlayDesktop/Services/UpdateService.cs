@@ -15,10 +15,12 @@ public class UpdateInfo
     public string LatestVersion { get; set; } = string.Empty;
     public string ReleaseNotes { get; set; } = string.Empty;
     public string DownloadUrl { get; set; } = string.Empty;
+    public bool IsInstaller { get; set; }
 }
 
 public interface IUpdateService
 {
+    string? LastError { get; }
     Task<UpdateInfo?> CheckForUpdatesAsync();
     Task<bool> DownloadAndApplyUpdateAsync(string downloadUrl, Action<int>? progressCallback = null);
 }
@@ -28,9 +30,14 @@ public class UpdateService : IUpdateService
     private const string GitHubApiUrl = "https://api.github.com/repos/jorjanion/uxplay-desktop/releases/latest";
     private readonly HttpClient _httpClient;
 
+    public string? LastError { get; private set; }
+
     public UpdateService()
     {
-        _httpClient = new HttpClient();
+        _httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromMinutes(10)
+        };
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "UxPlayDesktop-AutoUpdater");
     }
 
@@ -38,6 +45,7 @@ public class UpdateService : IUpdateService
     {
         try
         {
+            LastError = null;
             var response = await _httpClient.GetStringAsync(GitHubApiUrl).ConfigureAwait(false);
             using var doc = JsonDocument.Parse(response);
             var root = doc.RootElement;
@@ -53,15 +61,34 @@ public class UpdateService : IUpdateService
             if (!isNewer) return new UpdateInfo { IsUpdateAvailable = false, LatestVersion = latestTag };
 
             string downloadUrl = string.Empty;
+            bool isInstaller = false;
+
             if (root.TryGetProperty("assets", out var assetsElement) && assetsElement.ValueKind == JsonValueKind.Array)
             {
+                // 1st priority: Native Windows Setup Installer (.exe)
                 foreach (var asset in assetsElement.EnumerateArray())
                 {
                     var name = asset.GetProperty("name").GetString();
-                    if (name != null && name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    if (name != null && name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                     {
                         downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? string.Empty;
+                        isInstaller = true;
                         break;
+                    }
+                }
+
+                // 2nd priority: Portable ZIP archive
+                if (string.IsNullOrEmpty(downloadUrl))
+                {
+                    foreach (var asset in assetsElement.EnumerateArray())
+                    {
+                        var name = asset.GetProperty("name").GetString();
+                        if (name != null && name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                        {
+                            downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? string.Empty;
+                            isInstaller = false;
+                            break;
+                        }
                     }
                 }
             }
@@ -73,35 +100,41 @@ public class UpdateService : IUpdateService
                 IsUpdateAvailable = true,
                 LatestVersion = latestTag,
                 ReleaseNotes = notes,
-                DownloadUrl = downloadUrl
+                DownloadUrl = downloadUrl,
+                IsInstaller = isInstaller
             };
         }
-        catch
+        catch (Exception ex)
         {
+            LastError = ex.Message;
             return null;
         }
     }
 
     public async Task<bool> DownloadAndApplyUpdateAsync(string downloadUrl, Action<int>? progressCallback = null)
     {
-        if (string.IsNullOrEmpty(downloadUrl)) return false;
+        if (string.IsNullOrEmpty(downloadUrl))
+        {
+            LastError = "Download URL is empty.";
+            return false;
+        }
 
         try
         {
-            var tempDir = Path.Combine(Path.GetTempPath(), "UxPlayDesktopUpdate");
-            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+            LastError = null;
+            var tempDir = Path.Combine(Path.GetTempPath(), $"UxPlayUpdate_{Guid.NewGuid():N}");
             Directory.CreateDirectory(tempDir);
 
-            var zipPath = Path.Combine(tempDir, "update.zip");
-            var extractPath = Path.Combine(tempDir, "extracted");
+            bool isExe = downloadUrl.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+            var downloadedFile = Path.Combine(tempDir, isExe ? "UxPlayDesktop-Setup.exe" : "update.zip");
 
-            // Download
+            // Download stream
             using (var response = await _httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
             {
                 response.EnsureSuccessStatusCode();
                 var totalBytes = response.Content.Headers.ContentLength ?? -1L;
                 using var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                using var fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                using var fileStream = new FileStream(downloadedFile, FileMode.Create, FileAccess.Write, FileShare.None);
 
                 var buffer = new byte[81920];
                 long totalRead = 0;
@@ -118,16 +151,33 @@ public class UpdateService : IUpdateService
                 }
             }
 
-            // Extract
-            ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+            if (isExe)
+            {
+                // Direct installer update: run installer and exit
+                var psi = new ProcessStartInfo
+                {
+                    FileName = downloadedFile,
+                    Arguments = "/SILENT /CLOSEAPPLICATIONS",
+                    UseShellExecute = true,
+                    Verb = "runas"
+                };
 
-            // Create batch updater script
-            var currentExe = Process.GetCurrentProcess().MainModule?.FileName;
-            var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
-            var pid = Process.GetCurrentProcess().Id;
+                Process.Start(psi);
+                Environment.Exit(0);
+                return true;
+            }
+            else
+            {
+                // Portable ZIP fallback update
+                var extractPath = Path.Combine(tempDir, "extracted");
+                ZipFile.ExtractToDirectory(downloadedFile, extractPath, true);
 
-            var updaterScript = Path.Combine(tempDir, "apply_update.bat");
-            var scriptContent = $@"@echo off
+                var currentExe = Process.GetCurrentProcess().MainModule?.FileName;
+                var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
+                var pid = Process.GetCurrentProcess().Id;
+
+                var updaterScript = Path.Combine(tempDir, "apply_update.bat");
+                var scriptContent = $@"@echo off
 timeout /t 1 /nobreak > nul
 :waitpid
 tasklist /fi ""PID eq {pid}"" | find ""{pid}"" > nul
@@ -139,22 +189,24 @@ xcopy ""{extractPath}\*"" ""{installDir}\"" /s /e /y /q > nul
 start """" ""{currentExe}""
 exit
 ";
-            await File.WriteAllTextAsync(updaterScript, scriptContent).ConfigureAwait(false);
+                await File.WriteAllTextAsync(updaterScript, scriptContent).ConfigureAwait(false);
 
-            var psi = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = $"/c \"{updaterScript}\"",
-                CreateNoWindow = true,
-                UseShellExecute = false
-            };
-            Process.Start(psi);
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c \"{updaterScript}\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                };
+                Process.Start(psi);
 
-            Environment.Exit(0);
-            return true;
+                Environment.Exit(0);
+                return true;
+            }
         }
-        catch
+        catch (Exception ex)
         {
+            LastError = ex.Message;
             return false;
         }
     }
@@ -165,6 +217,7 @@ exit
         {
             return vLatest > vCurrent;
         }
+
         return string.Compare(latest, current, StringComparison.OrdinalIgnoreCase) > 0;
     }
 }

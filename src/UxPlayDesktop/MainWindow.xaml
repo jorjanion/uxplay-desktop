@@ -51,16 +51,33 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Start / Stop Button -->
-                <Button Grid.Column="1"
-                        Command="{Binding ToggleServerCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding StartStopButtonIcon}" Margin="0,0,8,0" FontSize="14" />
-                        <TextBlock Text="{Binding StartStopButtonText}" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Button>
+                <!-- Controls: Language Selector & Start/Stop Button -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ComboBox ItemsSource="{Binding Loc.SupportedLanguages}"
+                              SelectedItem="{Binding SelectedLanguage}"
+                              Width="160"
+                              Height="36"
+                              Margin="0,0,10,0"
+                              VerticalAlignment="Center">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Flag}" Margin="0,0,6,0" FontSize="14" />
+                                    <TextBlock Text="{Binding NativeName}" Foreground="White" FontSize="12" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Button Command="{Binding ToggleServerCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding StartStopButtonIcon}" Margin="0,0,8,0" FontSize="14" />
+                            <TextBlock Text="{Binding StartStopButtonText}" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -94,7 +111,7 @@
             </TabControl.Resources>
 
             <!-- TAB 1: DASHBOARD -->
-            <TabItem Header="Dashboard">
+            <TabItem Header="{Binding Loc[TabDashboard]}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,10,0,0">
 
@@ -111,14 +128,14 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="🚀 Nueva actualización disponible: " FontWeight="Bold" FontSize="14" Foreground="#90CAF9" />
-                                        <TextBlock Text="{Binding UpdateVersionText}" FontWeight="Bold" FontSize="14" Foreground="White" />
+                                        <TextBlock Text="🚀 " FontSize="14" />
+                                        <TextBlock Text="{Binding UpdateVersionText, StringFormat={Binding Loc[UpdateAvailableTitle]}}" FontWeight="Bold" FontSize="14" Foreground="#90CAF9" />
                                     </StackPanel>
-                                    <TextBlock Text="Se han incluido nuevas mejoras. Pulsa actualizar para aplicarla automáticamente en un clic." Foreground="#E3F2FD" FontSize="12" Margin="0,4,0,0" />
+                                    <TextBlock Text="{Binding Loc[UpdateAvailableDesc]}" Foreground="#E3F2FD" FontSize="12" Margin="0,4,0,0" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Content="Actualizar ahora" Command="{Binding ApplyUpdateCommand}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
-                                    <Button Content="Más tarde" Command="{Binding DismissUpdateCommand}" Style="{StaticResource SecondaryButtonStyle}" />
+                                    <Button Content="{Binding Loc[UpdateNow]}" Command="{Binding ApplyUpdateCommand}" Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0" />
+                                    <Button Content="{Binding Loc[UpdateLater]}" Command="{Binding DismissUpdateCommand}" Style="{StaticResource SecondaryButtonStyle}" />
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -152,7 +169,7 @@
                                 </Grid.RowDefinitions>
 
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
-                                    <TextBlock Text="Live Stream Metrics" FontSize="15" FontWeight="SemiBold" Foreground="White" />
+                                    <TextBlock Text="{Binding Loc[MetricsTitle]}" FontSize="15" FontWeight="SemiBold" Foreground="White" />
                                     <Border Background="#1A3320" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
                                         <TextBlock Text="ACTIVE HUD" FontSize="10" Foreground="#25D366" FontWeight="Bold" />
                                     </Border>
@@ -169,7 +186,7 @@
                                     <!-- Device Name -->
                                     <Border Grid.Column="0" Background="#1D1D1D" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                                         <StackPanel>
-                                            <TextBlock Text="CONNECTED DEVICE" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Loc[ConnectedDevice]}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding Session.ClientName, TargetNullValue='No Device'}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding Session.ClientIpAddress, TargetNullValue='Waiting...'}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                                         </StackPanel>
@@ -178,16 +195,16 @@
                                     <!-- Resolution -->
                                     <Border Grid.Column="1" Background="#1D1D1D" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                                         <StackPanel>
-                                            <TextBlock Text="RESOLUTION" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Loc[Resolution]}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding Session.ActiveResolution}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" />
-                                            <TextBlock Text="Hardware Direct3D" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                                            <TextBlock Text="{Binding Loc[HardwareAccelerated]}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                                         </StackPanel>
                                     </Border>
 
                                     <!-- Codec & FPS -->
                                     <Border Grid.Column="2" Background="#1D1D1D" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                                         <StackPanel>
-                                            <TextBlock Text="FORMAT &amp; FPS" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Loc[Framerate]}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding Session.ActiveCodec}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" />
                                             <TextBlock Text="{Binding Settings.TargetFps, StringFormat='Target: {0} FPS'}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                                         </StackPanel>
@@ -196,9 +213,9 @@
                                     <!-- Duration -->
                                     <Border Grid.Column="3" Background="#1D1D1D" CornerRadius="6" Padding="12">
                                         <StackPanel>
-                                            <TextBlock Text="STREAM TIME" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Loc[StreamTime]}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
                                             <TextBlock Text="{Binding FormattedDuration}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" />
-                                            <TextBlock Text="Live Session" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                                            <TextBlock Text="{Binding Loc[LiveSession]}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -215,19 +232,16 @@
 
                                 <StackPanel Grid.Column="0">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <TextBlock Text="💬 Discord &amp; OBS Streaming Helper" FontSize="14" FontWeight="Bold" Foreground="#5865F2" />
-                                        <Border Background="#5865F2" CornerRadius="3" Padding="4,1" Margin="8,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock Text="RECOMMENDED FOR TEACHING" FontSize="9" Foreground="White" FontWeight="Bold" />
-                                        </Border>
+                                        <TextBlock Text="💬 " FontSize="14" />
+                                        <TextBlock Text="{Binding Loc[DiscordHelperTitle]}" FontSize="14" FontWeight="Bold" Foreground="#5865F2" />
                                     </StackPanel>
-                                    <TextBlock Text="Easily share your iPad notes, whiteboard, or slides in Discord voice channels or OBS Studio." Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="0,2,0,0" />
-                                    <TextBlock Text="Window title is set to your server name for instant discovery in Discord's 'Screens &amp; Windows' picker." Foreground="{StaticResource TextMutedBrush}" FontSize="11" Margin="0,2,0,0" />
+                                    <TextBlock Text="{Binding Loc[DiscordHelperDesc]}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap" />
                                 </StackPanel>
 
                                 <Button Grid.Column="1"
                                         Command="{Binding CopyDiscordStreamNameCommand}"
                                         Style="{StaticResource SecondaryButtonStyle}"
-                                        Content="Copy Window Name"
+                                        Content="{Binding Loc[CopyWindowName]}"
                                         VerticalAlignment="Center" />
                             </Grid>
                         </Border>
@@ -235,8 +249,8 @@
                         <!-- STREAMING PRESET SELECTOR -->
                         <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="Streaming Profile &amp; Performance Preset" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,6" />
-                                <TextBlock Text="Select the profile best suited for your current task. No technical jargon required." Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,12" />
+                                <TextBlock Text="{Binding Loc[PresetTitle]}" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,6" />
+                                <TextBlock Text="{Binding Loc[PresetSubtitle]}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,12" />
 
                                 <ComboBox ItemsSource="{Binding AvailablePresets}"
                                           SelectedItem="{Binding SelectedPreset}"
@@ -263,18 +277,14 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Device Discovery &amp; Network Status" FontSize="14" FontWeight="SemiBold" Foreground="White" />
-                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                                        <TextBlock Text="Service Status: " Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
-                                        <TextBlock Text="{Binding BonjourStatusText}" Foreground="White" FontWeight="SemiBold" FontSize="12" />
-                                    </StackPanel>
-                                    <TextBlock Text="Apple devices locate UxPlay on your Wi-Fi via mDNS and Bluetooth Low Energy beacon." Foreground="{StaticResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" />
+                                    <TextBlock Text="{Binding Loc[BonjourTitle]}" FontSize="14" FontWeight="SemiBold" Foreground="White" />
+                                    <TextBlock Text="{Binding Loc[BonjourDesc]}" Foreground="{StaticResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" />
                                 </StackPanel>
 
                                 <Button Grid.Column="1"
                                         Command="{Binding FixBonjourCommand}"
                                         Style="{StaticResource SecondaryButtonStyle}"
-                                        Content="Verify Bonjour"
+                                        Content="{Binding Loc[RepairBonjour]}"
                                         VerticalAlignment="Center" />
                             </Grid>
                         </Border>
@@ -284,21 +294,37 @@
             </TabItem>
 
             <!-- TAB 2: SETTINGS -->
-            <TabItem Header="Settings">
+            <TabItem Header="{Binding Loc[TabSettings]}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,10,0,0">
 
                         <!-- General Settings -->
                         <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="General Configuration" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
+                                <TextBlock Text="{Binding Loc[GeneralSettings]}" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
 
-                                <TextBlock Text="AirPlay Server Display Name" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding Loc[LanguageLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                <ComboBox ItemsSource="{Binding Loc.SupportedLanguages}"
+                                          SelectedItem="{Binding SelectedLanguage}"
+                                          Height="36"
+                                          Margin="0,0,0,12">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Flag}" Margin="0,0,6,0" FontSize="14" />
+                                                <TextBlock Text="{Binding NativeName}" Foreground="White" FontSize="12" />
+                                                <TextBlock Text="{Binding DisplayName, StringFormat=' ({0})'}" Foreground="#888888" FontSize="11" Margin="4,0,0,0" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <TextBlock Text="{Binding Loc[ServerNameLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                 <TextBox Text="{Binding Settings.ServerName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
 
-                                <CheckBox Content="Start UxPlay Desktop on Windows login" IsChecked="{Binding Settings.StartOnBoot}" Margin="0,0,0,8" />
-                                <CheckBox Content="Minimize to System Tray on close" IsChecked="{Binding Settings.MinimizeToTray}" Margin="0,0,0,8" />
-                                <CheckBox Content="Automatically start AirPlay server when application opens" IsChecked="{Binding Settings.AutoStartServer}" Margin="0,0,0,8" />
+                                <CheckBox Content="{Binding Loc[StartWithWindowsLabel]}" IsChecked="{Binding Settings.StartOnBoot}" Margin="0,0,0,8" />
+                                <CheckBox Content="{Binding Loc[MinimizeToTrayLabel]}" IsChecked="{Binding Settings.MinimizeToTray}" Margin="0,0,0,8" />
+                                <CheckBox Content="{Binding Loc[AutoStartServerLabel]}" IsChecked="{Binding Settings.AutoStartServer}" Margin="0,0,0,8" />
                                 <CheckBox Content="Inhibit sleep and screensaver while presenting or mirroring" IsChecked="{Binding Settings.InhibitSleepAndScreensaver}" Margin="0,0,0,8" />
                                 <CheckBox Content="Enable Bluetooth Low Energy (BLE) beacon for instant Apple discovery" IsChecked="{Binding Settings.EnableBluetoothBeacon}" Margin="0,0,0,4" />
                             </StackPanel>
@@ -307,7 +333,7 @@
                         <!-- Video Settings -->
                         <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="Display &amp; Video Quality" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
+                                <TextBlock Text="{Binding Loc[DisplayVideoSettings]}" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
 
                                 <Grid Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
@@ -333,30 +359,30 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                        <TextBlock Text="Target Framerate (FPS)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding Loc[FramerateLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                         <TextBox Text="{Binding Settings.TargetFps}" />
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1">
-                                        <TextBlock Text="Direct3D Video Sink" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding Loc[VideoSinkLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                         <TextBox Text="{Binding Settings.VideoSink}" />
                                     </StackPanel>
                                 </Grid>
 
-                                <CheckBox Content="Enable H.265 / HEVC hardware decoding" IsChecked="{Binding Settings.EnableH265}" Margin="0,0,0,8" />
+                                <CheckBox Content="{Binding Loc[EnableH265Label]}" IsChecked="{Binding Settings.EnableH265}" Margin="0,0,0,8" />
                                 <CheckBox Content="Force Fullscreen display mode (Alt+Enter toggles)" IsChecked="{Binding Settings.ForceFullscreen}" Margin="0,0,0,8" />
-                                <CheckBox Content="Borderless window mode (Optimized for Discord &amp; OBS capture)" IsChecked="{Binding Settings.BorderlessWindow}" Margin="0,0,0,4" />
+                                <CheckBox Content="{Binding Loc[BorderlessLabel]}" IsChecked="{Binding Settings.BorderlessWindow}" Margin="0,0,0,4" />
                             </StackPanel>
                         </Border>
 
                         <!-- Security & Pairing -->
                         <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="Security &amp; PIN Pairing" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
+                                <TextBlock Text="{Binding Loc[SecuritySettings]}" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
 
-                                <CheckBox Content="Require PIN authentication for client connections" IsChecked="{Binding Settings.RequirePin}" Margin="0,0,0,10" />
+                                <CheckBox Content="{Binding Loc[RequirePinLabel]}" IsChecked="{Binding Settings.RequirePin}" Margin="0,0,0,10" />
 
-                                <TextBlock Text="Fixed 4-Digit PIN Code (Leave blank for random security PIN):" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding Loc[FixedPinLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                 <TextBox Text="{Binding Settings.FixedPin}" MaxLength="4" Margin="0,0,0,12" />
 
                                 <TextBlock Text="Optional Password (Optional legacy AirPlay password):" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
@@ -367,20 +393,20 @@
                         <!-- Audio Settings -->
                         <Border Style="{StaticResource CardStyle}" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="Audio &amp; Synchronization Calibration" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
+                                <TextBlock Text="{Binding Loc[AudioSettings]}" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,12" />
 
-                                <CheckBox Content="Enable AirPlay audio playback" IsChecked="{Binding Settings.EnableAudio}" Margin="0,0,0,10" />
+                                <CheckBox Content="{Binding Loc[EnableAudioLabel]}" IsChecked="{Binding Settings.EnableAudio}" Margin="0,0,0,10" />
 
                                 <TextBlock Text="{Binding Settings.AudioDelayMs, StringFormat='Audio Sync Delay: {0} ms'}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                 <Slider Minimum="-500" Maximum="500" Value="{Binding Settings.AudioDelayMs}" TickFrequency="50" IsSnapToTickEnabled="True" Margin="0,0,0,8" />
-                                <TextBlock Text="Adjust positive or negative milliseconds to compensate for Bluetooth speaker or headphone latency." Foreground="{StaticResource TextMutedBrush}" FontSize="11" />
+                                <TextBlock Text="{Binding Loc[AudioDelayLabel]}" Foreground="{StaticResource TextMutedBrush}" FontSize="11" />
                             </StackPanel>
                         </Border>
 
                         <!-- Save Button -->
                         <Button Command="{Binding SaveSettingsCommand}"
                                 Style="{StaticResource PrimaryButtonStyle}"
-                                Content="💾 Save Settings"
+                                Content="{Binding Loc[SaveSettings]}"
                                 HorizontalAlignment="Left"
                                 Margin="0,0,0,20" />
 
@@ -389,7 +415,7 @@
             </TabItem>
 
             <!-- TAB 3: REAL-TIME LOGS -->
-            <TabItem Header="Real-time Logs">
+            <TabItem Header="{Binding Loc[TabLogs]}">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -412,15 +438,15 @@
                                      Margin="0,0,10,0" />
 
                             <Button Grid.Column="1"
-                                    Command="{Binding Logs.CopyLogsCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="📋 Copy All"
-                                    Margin="0,0,8,0" />
+                                     Command="{Binding Logs.CopyLogsCommand}"
+                                     Style="{StaticResource SecondaryButtonStyle}"
+                                     Content="{Binding Loc[LogsCopy]}"
+                                     Margin="0,0,8,0" />
 
                             <Button Grid.Column="2"
-                                    Command="{Binding Logs.ClearLogsCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="🗑 Clear" />
+                                     Command="{Binding Logs.ClearLogsCommand}"
+                                     Style="{StaticResource SecondaryButtonStyle}"
+                                     Content="{Binding Loc[LogsClear]}" />
                         </Grid>
                     </Border>
 
@@ -454,11 +480,11 @@
             </TabItem>
 
             <!-- TAB 4: ABOUT -->
-            <TabItem Header="About">
+            <TabItem Header="{Binding Loc[TabAbout]}">
                 <Border Style="{StaticResource CardStyle}" Margin="0,10,0,0">
                     <StackPanel>
                         <TextBlock Text="UxPlay Desktop for Windows" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,0,0,6" />
-                        <TextBlock Text="Modern, reliable, and user-friendly AirPlay screen mirroring desktop application." Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,16" />
+                        <TextBlock Text="{Binding Loc[AboutSubtitle]}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="13" Margin="0,0,0,16" />
 
                         <TextBlock Text="Created for educators, online streamers, and presentation hosts to deliver seamless iPad / iPhone screen mirroring to Windows PCs with zero technical friction." Foreground="#CCCCCC" TextWrapping="Wrap" Margin="0,0,0,16" />
 
@@ -468,7 +494,7 @@
                         <TextBlock Text="• Automatic keyframe synchronization &amp; deferred state transitions" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,2" />
                         <TextBlock Text="• Windows power request display inhibitor to prevent sleep during lectures" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16" />
 
-                        <TextBlock Text="Repository &amp; License:" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4" />
+                        <TextBlock Text="{Binding Loc[AboutAuthor]}" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,4" />
                         <TextBlock Text="GitHub: https://github.com/jorjanion/uxplay-desktop" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,2" />
                         <TextBlock Text="License: GNU General Public License v3.0 (GPL-3.0)" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16" />
                     </StackPanel>
@@ -486,7 +512,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0" Text="{Binding StatusDescription}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="1" Text="UxPlay Desktop v1.0.0" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="UxPlay Desktop v1.1.0" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
             </Grid>
         </Border>
     </Grid>
