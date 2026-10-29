@@ -377,9 +377,12 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
     {
         try
         {
+            var appDir = AppDomain.CurrentDomain.BaseDirectory;
+            var localPluginDir = Path.Combine(appDir, "lib", "gstreamer-1.0");
+
             string[] gstCandidates =
             [
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "uxplay-windows"),
+                appDir,
                 @"C:\msys64\ucrt64\bin",
                 @"C:\msys64\mingw64\bin",
                 @"C:\gstreamer\1.0\msvc_x86_64\bin",
@@ -398,6 +401,14 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
             }
 
             startInfo.EnvironmentVariables["PATH"] = string.Join(";", paths);
+
+            if (Directory.Exists(localPluginDir))
+            {
+                startInfo.EnvironmentVariables["GST_PLUGIN_PATH"] = localPluginDir;
+                startInfo.EnvironmentVariables["GST_PLUGIN_PATH_1_0"] = localPluginDir;
+                startInfo.EnvironmentVariables["GST_PLUGIN_SYSTEM_PATH"] = localPluginDir;
+                startInfo.EnvironmentVariables["GST_PLUGIN_SYSTEM_PATH_1_0"] = localPluginDir;
+            }
         }
         catch { }
     }

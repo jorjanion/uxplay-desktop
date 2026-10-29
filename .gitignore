@@ -1,6 +1,10 @@
 # Old reference repository
 leapbtw-uxplay/
 
+# Runtime libraries and binaries
+runtimes/
+core/uxplay.exe
+
 # Build artifacts and binaries
 [Bb]in/
 [Oo]bj/

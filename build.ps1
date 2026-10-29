@@ -112,7 +112,13 @@ switch ($Action) {
         if (-not (Test-Path $resourceDest)) { New-Item -ItemType Directory -Force -Path $resourceDest | Out-Null }
         Copy-Item -Path (Join-Path $ProjectRoot "resources\*") -Destination $resourceDest -Force -Recurse
 
-        # Copy native core executable if available
+        # Copy runtime dependencies and native core executable if available
+        $runtimeNative = Join-Path $ProjectRoot "runtimes\win-x64\native"
+        if (Test-Path $runtimeNative) {
+            Write-Host "Bundling runtime dependencies from $runtimeNative..." -ForegroundColor Green
+            Copy-Item -Path (Join-Path $runtimeNative "*") -Destination $publishDir -Recurse -Force
+        }
+
         $nativeCandidates = @(
             (Join-Path $ProjectRoot "core\build\uxplay.exe"),
             (Join-Path $ProjectRoot "core\uxplay.exe")
