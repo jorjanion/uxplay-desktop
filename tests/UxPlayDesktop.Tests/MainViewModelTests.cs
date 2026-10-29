@@ -49,6 +49,7 @@ public class MockBonjourService : IBonjourService
     public BonjourStatus Status { get; set; } = BonjourStatus.Running;
     public BonjourStatus CheckStatus() => Status;
     public bool TryStartService() => true;
+    public bool RepairOrInstallService() => true;
 }
 
 public class MockAutostartService : IAutostartService

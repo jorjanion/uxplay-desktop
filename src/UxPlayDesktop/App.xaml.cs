@@ -19,10 +19,11 @@ public partial class App : Application
         var processManager = new CoreProcessManager(argumentBuilder, logParser);
         var bonjourService = new BonjourService();
         var autostartService = new AutostartService();
+        var updateService = new UpdateService();
 
         _processManager = processManager;
 
-        var mainVm = new MainViewModel(settingsService, processManager, bonjourService, autostartService);
+        var mainVm = new MainViewModel(settingsService, processManager, bonjourService, autostartService, updateService);
 
         var mainWindow = new MainWindow
         {

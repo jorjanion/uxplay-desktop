@@ -110,9 +110,8 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         var exePath = FindCoreExecutablePath();
         if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
         {
-            // If the native binary isn't built on the machine yet, log clear diagnostic message
-            Log(LogLevel.Warning, "UxPlay native engine binary ('uxplay.exe') not found in deployment directory. Running in diagnostic ready mode.");
-            SetState(ServerState.Listening);
+            Log(LogLevel.Error, "UxPlay native engine binary ('uxplay.exe') not found in deployment directory.");
+            SetState(ServerState.Error);
             return false;
         }
 
@@ -125,10 +124,12 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         }
 
         var arguments = _argumentBuilder.BuildCommandLineString(settings, bleFilePath);
+        var exeDir = Path.GetDirectoryName(exePath) ?? AppDomain.CurrentDomain.BaseDirectory;
 
         var startInfo = new ProcessStartInfo
         {
             FileName = exePath,
+            WorkingDirectory = exeDir,
             Arguments = arguments,
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -398,6 +399,11 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
                 {
                     paths.Insert(0, candidate);
                 }
+            }
+
+            if (!string.IsNullOrEmpty(startInfo.WorkingDirectory) && Directory.Exists(startInfo.WorkingDirectory) && !paths.Contains(startInfo.WorkingDirectory, StringComparer.OrdinalIgnoreCase))
+            {
+                paths.Insert(0, startInfo.WorkingDirectory);
             }
 
             startInfo.EnvironmentVariables["PATH"] = string.Join(";", paths);

@@ -16,6 +16,7 @@ public class MainViewModel : ViewModelBase
     private readonly ICoreProcessManager _processManager;
     private readonly IBonjourService _bonjourService;
     private readonly IAutostartService _autostartService;
+    private readonly IUpdateService _updateService;
     private readonly DispatcherTimer _sessionTimer;
 
     private AppSettings _settings;
@@ -24,6 +25,12 @@ public class MainViewModel : ViewModelBase
     private string _formattedDuration = "00:00:00";
     private BonjourStatus _bonjourStatus;
     private string _bonjourStatusText = "Checking...";
+
+    private UpdateInfo? _latestUpdate;
+    private bool _isUpdateAvailable;
+    private string _updateVersionText = "";
+    private bool _isUpdating;
+    private int _updateProgress;
 
     public AppSettings Settings
     {
@@ -141,22 +148,50 @@ public class MainViewModel : ViewModelBase
         PerformancePreset.Custom
     ];
 
+    public bool IsUpdateAvailable
+    {
+        get => _isUpdateAvailable;
+        set => SetField(ref _isUpdateAvailable, value);
+    }
+
+    public string UpdateVersionText
+    {
+        get => _updateVersionText;
+        set => SetField(ref _updateVersionText, value);
+    }
+
+    public bool IsUpdating
+    {
+        get => _isUpdating;
+        set => SetField(ref _isUpdating, value);
+    }
+
+    public int UpdateProgress
+    {
+        get => _updateProgress;
+        set => SetField(ref _updateProgress, value);
+    }
+
     public ICommand ToggleServerCommand { get; }
     public ICommand SaveSettingsCommand { get; }
     public ICommand CopyDiscordStreamNameCommand { get; }
     public ICommand FixBonjourCommand { get; }
     public ICommand DismissPinCommand { get; }
+    public ICommand ApplyUpdateCommand { get; }
+    public ICommand DismissUpdateCommand { get; }
 
     public MainViewModel(
         ISettingsService settingsService,
         ICoreProcessManager processManager,
         IBonjourService bonjourService,
-        IAutostartService autostartService)
+        IAutostartService autostartService,
+        IUpdateService? updateService = null)
     {
         _settingsService = settingsService;
         _processManager = processManager;
         _bonjourService = bonjourService;
         _autostartService = autostartService;
+        _updateService = updateService ?? new UpdateService();
 
         _settings = _settingsService.CurrentSettings;
         Logs = new LogsViewModel();
@@ -171,6 +206,8 @@ public class MainViewModel : ViewModelBase
         CopyDiscordStreamNameCommand = new RelayCommand(CopyDiscordStreamName);
         FixBonjourCommand = new RelayCommand(FixBonjour);
         DismissPinCommand = new RelayCommand(() => ActivePinCode = null);
+        ApplyUpdateCommand = new RelayCommand(async () => await ApplyUpdateAsync());
+        DismissUpdateCommand = new RelayCommand(() => IsUpdateAvailable = false);
 
         _sessionTimer = new DispatcherTimer
         {
@@ -184,6 +221,61 @@ public class MainViewModel : ViewModelBase
         if (Settings.AutoStartServer)
         {
             _ = StartServerAsync();
+        }
+
+        _ = CheckForUpdatesAsync();
+    }
+
+    private async Task ApplyUpdateAsync()
+    {
+        if (_latestUpdate == null || string.IsNullOrEmpty(_latestUpdate.DownloadUrl)) return;
+        IsUpdating = true;
+        bool ok = await _updateService.DownloadAndApplyUpdateAsync(_latestUpdate.DownloadUrl, p => RunOnUi(() => UpdateProgress = p));
+        if (!ok)
+        {
+            IsUpdating = false;
+            MessageBox.Show("Failed to download or apply update automatically. Please download the latest version from GitHub Releases.", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var info = await _updateService.CheckForUpdatesAsync();
+            if (info != null && info.IsUpdateAvailable)
+            {
+                RunOnUi(() =>
+                {
+                    _latestUpdate = info;
+                    UpdateVersionText = info.LatestVersion;
+                    IsUpdateAvailable = true;
+                });
+            }
+        }
+        catch { }
+    }
+
+    private void FixBonjour()
+    {
+        if (_bonjourService.CheckStatus() == BonjourStatus.Running)
+        {
+            MessageBox.Show("Bonjour Service is already active and running!", "Discovery", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        if (_bonjourService.RepairOrInstallService() || _bonjourService.TryStartService())
+        {
+            CheckBonjourStatus();
+            MessageBox.Show("Bonjour Service configured and started successfully!", "Discovery", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else
+        {
+            MessageBox.Show(
+                "Could not automatically configure Apple Bonjour service. Please run 'fix_bonjour.bat' as Administrator if Apple devices cannot find the PC.",
+                "Discovery",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
         }
     }
 
@@ -224,23 +316,6 @@ public class MainViewModel : ViewModelBase
                 MessageBoxImage.Information);
         }
         catch { }
-    }
-
-    private void FixBonjour()
-    {
-        if (_bonjourService.TryStartService())
-        {
-            CheckBonjourStatus();
-            MessageBox.Show("Bonjour Service started successfully!", "Discovery", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        else
-        {
-            MessageBox.Show(
-                "Could not automatically start Apple Bonjour.\nUxPlay core engine also features an internal standalone mDNS discovery mechanism as fallback.",
-                "Discovery",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
-        }
     }
 
     private void CheckBonjourStatus()

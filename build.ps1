@@ -103,7 +103,7 @@ switch ($Action) {
         & $DotnetExe publish (Join-Path $ProjectRoot "src\UxPlayDesktop\UxPlayDesktop.csproj") `
             -c "Release" `
             -r win-x64 `
-            --self-contained false `
+            --self-contained true `
             -o $publishDir `
             --nologo
 

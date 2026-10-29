@@ -16,11 +16,49 @@ public interface IBonjourService
 {
     BonjourStatus CheckStatus();
     bool TryStartService();
+    bool RepairOrInstallService();
 }
 
 public class BonjourService : IBonjourService
 {
     private const string ServiceName = "Bonjour Service";
+
+    public bool RepairOrInstallService()
+    {
+        try
+        {
+            var appDir = AppDomain.CurrentDomain.BaseDirectory;
+            var mdnsExe = System.IO.Path.Combine(appDir, "mDNSResponder.exe");
+            if (!System.IO.File.Exists(mdnsExe))
+            {
+                var candidate = System.IO.Path.Combine(appDir, "runtimes", "win-x64", "native", "mDNSResponder.exe");
+                if (System.IO.File.Exists(candidate)) mdnsExe = candidate;
+            }
+
+            if (System.IO.File.Exists(mdnsExe))
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = mdnsExe,
+                    Arguments = "-install",
+                    Verb = "runas",
+                    UseShellExecute = true
+                };
+
+                using var proc = Process.Start(psi);
+                proc?.WaitForExit(6000);
+
+                TryStartService();
+                return CheckStatus() == BonjourStatus.Running;
+            }
+
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     public BonjourStatus CheckStatus()
     {

@@ -4,6 +4,7 @@ leapbtw-uxplay/
 # Runtime libraries and binaries
 runtimes/
 core/uxplay.exe
+core/*.dll
 
 # Build artifacts and binaries
 [Bb]in/
