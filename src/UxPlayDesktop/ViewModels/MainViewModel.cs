@@ -142,7 +142,36 @@ public class MainViewModel : ViewModelBase
     public string DisplayTargetFps => string.Format(Loc["TargetFpsFormat"], Settings.TargetFps);
     public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
     public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
-    public string AppVersionDisplay => "UxPlay Desktop v1.1.5";
+    public string AppVersionDisplay => "UxPlay Desktop v1.1.6";
+    public string LocalNetworkInfo => GetLocalNetworkInfo();
+
+    public bool StartOnBoot
+    {
+        get => Settings.StartOnBoot;
+        set
+        {
+            if (Settings.StartOnBoot != value)
+            {
+                Settings.StartOnBoot = value;
+                OnPropertyChanged();
+                SaveSettings();
+            }
+        }
+    }
+
+    public bool StartMinimized
+    {
+        get => Settings.StartMinimized;
+        set
+        {
+            if (Settings.StartMinimized != value)
+            {
+                Settings.StartMinimized = value;
+                OnPropertyChanged();
+                SaveSettings();
+            }
+        }
+    }
 
     public string StatusColor => ServerState switch
     {
@@ -373,12 +402,42 @@ public class MainViewModel : ViewModelBase
     private void SaveSettings()
     {
         _settingsService.Save(Settings);
-        _autostartService.SetAutostart(Settings.StartOnBoot);
+        _autostartService.SetAutostart(Settings.StartOnBoot, Settings.StartMinimized);
         OnPropertyChanged(nameof(DisplayTargetFps));
         OnPropertyChanged(nameof(DisplayAudioDelay));
         OnPropertyChanged(nameof(DisplayStep3Desc));
         OnPropertyChanged(nameof(StatusDescription));
         OnPropertyChanged(nameof(StatusSubtitle));
+        OnPropertyChanged(nameof(StartOnBoot));
+        OnPropertyChanged(nameof(StartMinimized));
+    }
+
+    private static string GetLocalNetworkInfo()
+    {
+        try
+        {
+            var interfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
+                .Where(ni => ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                             ni.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback &&
+                             !ni.Description.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
+                             !ni.Description.Contains("Pseudo", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var ni in interfaces)
+            {
+                var props = ni.GetIPProperties();
+                var ipv4 = props.UnicastAddresses
+                    .FirstOrDefault(ua => ua.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
+                                          !System.Net.IPAddress.IsLoopback(ua.Address))?.Address;
+
+                if (ipv4 != null)
+                {
+                    return $"{ipv4} ({ni.Name})";
+                }
+            }
+        }
+        catch { }
+        return "127.0.0.1";
     }
 
     private void CheckBonjourStatus()

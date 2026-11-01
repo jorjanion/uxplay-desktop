@@ -8,7 +8,7 @@ namespace UxPlayDesktop.Services;
 public interface IAutostartService
 {
     bool IsAutostartEnabled();
-    void SetAutostart(bool enable);
+    void SetAutostart(bool enable, bool startMinimized = false);
 }
 
 public class AutostartService : IAutostartService
@@ -30,7 +30,7 @@ public class AutostartService : IAutostartService
         }
     }
 
-    public void SetAutostart(bool enable)
+    public void SetAutostart(bool enable, bool startMinimized = false)
     {
         try
         {
@@ -42,7 +42,8 @@ public class AutostartService : IAutostartService
                 var exePath = Process.GetCurrentProcess().MainModule?.FileName;
                 if (!string.IsNullOrEmpty(exePath))
                 {
-                    key.SetValue(AppName, $"\"{exePath}\" --minimized");
+                    var args = startMinimized ? " --minimized" : "";
+                    key.SetValue(AppName, $"\"{exePath}\"{args}");
                 }
             }
             else

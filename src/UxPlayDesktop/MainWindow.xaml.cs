@@ -17,13 +17,18 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    public void InitializeTray()
     {
-        if (DataContext is MainViewModel vm)
+        if (_trayService == null && DataContext is MainViewModel vm)
         {
             _trayService = new TrayIconService();
             _trayService.Initialize(this, vm);
         }
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        InitializeTray();
     }
 
     public void RequestCloseAndExit()
@@ -39,6 +44,7 @@ public partial class MainWindow : Window
             e.Cancel = true;
             WindowState = WindowState.Minimized;
             ShowInTaskbar = false;
+            Hide();
             _trayService?.ShowNotification("UxPlay Desktop", "UxPlay is running in the background. Click this tray icon to restore.");
             return;
         }

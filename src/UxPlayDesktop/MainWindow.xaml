@@ -365,6 +365,11 @@
                                 <StackPanel Grid.Column="0">
                                     <TextBlock Text="{Binding Loc[BonjourTitle]}" FontSize="14" FontWeight="SemiBold" Foreground="White" />
                                     <TextBlock Text="{Binding Loc[BonjourDesc]}" Foreground="{StaticResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <TextBlock Text="🌐 " FontSize="12" />
+                                        <TextBlock Text="{Binding Loc[LocalIpLabel], StringFormat='{}{0}: '}" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" />
+                                        <TextBlock Text="{Binding LocalNetworkInfo}" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" />
+                                    </StackPanel>
                                 </StackPanel>
 
                                 <Button Grid.Column="1"
@@ -408,7 +413,8 @@
                                 <TextBlock Text="{Binding Loc[ServerNameLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                 <TextBox Text="{Binding Settings.ServerName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
 
-                                <CheckBox Content="{Binding Loc[StartWithWindowsLabel]}" IsChecked="{Binding Settings.StartOnBoot}" Margin="0,0,0,8" />
+                                <CheckBox Content="{Binding Loc[StartWithWindowsLabel]}" IsChecked="{Binding StartOnBoot}" Margin="0,0,0,6" />
+                                <CheckBox Content="{Binding Loc[StartMinimizedLabel]}" IsChecked="{Binding StartMinimized}" Margin="20,0,0,8" />
                                 <CheckBox Content="{Binding Loc[MinimizeToTrayLabel]}" IsChecked="{Binding Settings.MinimizeToTray}" Margin="0,0,0,8" />
                                 <CheckBox Content="{Binding Loc[AutoStartServerLabel]}" IsChecked="{Binding Settings.AutoStartServer}" Margin="0,0,0,8" />
                                 <CheckBox Content="{Binding Loc[InhibitSleepLabel]}" IsChecked="{Binding Settings.InhibitSleepAndScreensaver}" Margin="0,0,0,8" />

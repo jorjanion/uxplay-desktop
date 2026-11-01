@@ -77,6 +77,14 @@ public class TrayIconService : ITrayIconService
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern int RegisterWindowMessage(string lpString);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+    public static readonly int WM_SHOW_UXPLAY = RegisterWindowMessage("UxPlayDesktop_ShowMainWindow_Message");
+
     public void Initialize(Window window, MainViewModel viewModel)
     {
         _window = window;
@@ -132,6 +140,13 @@ public class TrayIconService : ITrayIconService
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
+        if (msg == WM_SHOW_UXPLAY)
+        {
+            RestoreWindow();
+            handled = true;
+            return IntPtr.Zero;
+        }
+
         if (msg == WM_TRAY)
         {
             int action = lParam.ToInt32();

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Windows;
 using UxPlayDesktop.Services;
 using UxPlayDesktop.ViewModels;
@@ -8,9 +9,22 @@ namespace UxPlayDesktop;
 public partial class App : Application
 {
     private ICoreProcessManager? _processManager;
+    private static Mutex? _singleInstanceMutex;
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        const string mutexName = "Local\\UxPlayDesktop_SingleInstance_Mutex";
+        _singleInstanceMutex = new Mutex(true, mutexName, out bool isOnlyInstance);
+
+        if (!isOnlyInstance)
+        {
+            // Another instance is already running: signal it to restore and bring to foreground
+            int wmShow = TrayIconService.RegisterWindowMessage("UxPlayDesktop_ShowMainWindow_Message");
+            TrayIconService.PostMessage((IntPtr)0xffff /* HWND_BROADCAST */, wmShow, IntPtr.Zero, IntPtr.Zero);
+            Shutdown();
+            return;
+        }
+
         base.OnStartup(e);
 
         var settingsService = new SettingsService();
@@ -30,21 +44,42 @@ public partial class App : Application
             DataContext = mainVm
         };
 
+        // Initialize tray icon early before window state transitions
+        mainWindow.InitializeTray();
+
         bool startMinimized = settingsService.CurrentSettings.StartMinimized;
         foreach (var arg in e.Args)
         {
             if (arg.Equals("--minimized", StringComparison.OrdinalIgnoreCase) ||
+                arg.Equals("-minimized", StringComparison.OrdinalIgnoreCase) ||
+                arg.Equals("/minimized", StringComparison.OrdinalIgnoreCase) ||
                 arg.Equals("-min", StringComparison.OrdinalIgnoreCase))
             {
                 startMinimized = true;
+                break;
+            }
+            if (arg.Equals("--normal", StringComparison.OrdinalIgnoreCase) ||
+                arg.Equals("-normal", StringComparison.OrdinalIgnoreCase) ||
+                arg.Equals("/normal", StringComparison.OrdinalIgnoreCase))
+            {
+                startMinimized = false;
                 break;
             }
         }
 
         if (startMinimized)
         {
-            mainWindow.WindowState = WindowState.Minimized;
-            mainWindow.Show();
+            if (settingsService.CurrentSettings.MinimizeToTray)
+            {
+                mainWindow.WindowState = WindowState.Minimized;
+                mainWindow.ShowInTaskbar = false;
+                mainWindow.Hide();
+            }
+            else
+            {
+                mainWindow.WindowState = WindowState.Minimized;
+                mainWindow.Show();
+            }
         }
         else
         {
@@ -54,6 +89,13 @@ public partial class App : Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        if (_singleInstanceMutex != null)
+        {
+            try { _singleInstanceMutex.ReleaseMutex(); } catch { }
+            _singleInstanceMutex.Dispose();
+            _singleInstanceMutex = null;
+        }
+
         if (_processManager != null)
         {
             await _processManager.StopAsync();

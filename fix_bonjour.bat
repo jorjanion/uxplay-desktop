@@ -63,14 +63,33 @@ if "%IS_SILENT%"=="0" echo [3/5] Registrando servicio Bonjour en Windows Service
 "%ProgramFiles%\Bonjour\mDNSResponder.exe" -install >nul 2>&1
 sc.exe config "Bonjour Service" start= auto >nul 2>&1
 
-if "%IS_SILENT%"=="0" echo [4/5] Configurando Reglas de Firewall para AirPlay y Bonjour...
+if "%IS_SILENT%"=="0" echo [4/5] Configurando Reglas de Firewall para AirPlay y Bonjour en todas las redes...
 netsh advfirewall firewall delete rule name="Bonjour Service (AirPlay)" >nul 2>&1
-netsh advfirewall firewall add rule name="Bonjour Service (AirPlay)" dir=in action=allow program="%ProgramFiles%\Bonjour\mDNSResponder.exe" enable=yes >nul 2>&1
-netsh advfirewall firewall add rule name="Bonjour Service (AirPlay)" dir=out action=allow program="%ProgramFiles%\Bonjour\mDNSResponder.exe" enable=yes >nul 2>&1
+netsh advfirewall firewall add rule name="Bonjour Service (AirPlay)" dir=in action=allow program="%ProgramFiles%\Bonjour\mDNSResponder.exe" enable=yes profile=any >nul 2>&1
+netsh advfirewall firewall add rule name="Bonjour Service (AirPlay)" dir=out action=allow program="%ProgramFiles%\Bonjour\mDNSResponder.exe" enable=yes profile=any >nul 2>&1
 
 netsh advfirewall firewall delete rule name="UxPlay AirPlay Streaming" >nul 2>&1
-netsh advfirewall firewall add rule name="UxPlay AirPlay Streaming" dir=in action=allow protocol=TCP localport=7000,7001,7100 enable=yes >nul 2>&1
-netsh advfirewall firewall add rule name="UxPlay AirPlay Streaming UDP" dir=in action=allow protocol=UDP localport=6000-6009,7010,7011,5353 enable=yes >nul 2>&1
+netsh advfirewall firewall add rule name="UxPlay AirPlay Streaming" dir=in action=allow protocol=TCP localport=7000,7001,7100 enable=yes profile=any >nul 2>&1
+netsh advfirewall firewall add rule name="UxPlay AirPlay Streaming UDP" dir=in action=allow protocol=UDP localport=6000-6009,7010,7011,5353 enable=yes profile=any >nul 2>&1
+
+:: Limpiar reglas residuales o bloqueos accidentales
+netsh advfirewall firewall delete rule name="uxplay" >nul 2>&1
+netsh advfirewall firewall delete rule name="uxplay-windows" >nul 2>&1
+netsh advfirewall firewall delete rule name="UxPlay Core Engine" >nul 2>&1
+netsh advfirewall firewall delete rule name="UxPlay Desktop UI" >nul 2>&1
+
+if exist "%ProgramFiles%\UxPlayDesktop\uxplay.exe" (
+    netsh advfirewall firewall add rule name="UxPlay Core Engine" dir=in action=allow program="%ProgramFiles%\UxPlayDesktop\uxplay.exe" enable=yes profile=any >nul 2>&1
+)
+if exist "%ProgramFiles%\UxPlayDesktop\UxPlayDesktop.exe" (
+    netsh advfirewall firewall add rule name="UxPlay Desktop UI" dir=in action=allow program="%ProgramFiles%\UxPlayDesktop\UxPlayDesktop.exe" enable=yes profile=any >nul 2>&1
+)
+if exist "%~dp0uxplay.exe" (
+    netsh advfirewall firewall add rule name="UxPlay Core Engine" dir=in action=allow program="%~dp0uxplay.exe" enable=yes profile=any >nul 2>&1
+)
+if exist "%~dp0UxPlayDesktop.exe" (
+    netsh advfirewall firewall add rule name="UxPlay Desktop UI" dir=in action=allow program="%~dp0UxPlayDesktop.exe" enable=yes profile=any >nul 2>&1
+)
 
 if "%IS_SILENT%"=="0" echo [5/5] Iniciando Bonjour Service...
 net start "Bonjour Service" >nul 2>&1

@@ -55,8 +55,13 @@ public class MockBonjourService : IBonjourService
 public class MockAutostartService : IAutostartService
 {
     public bool AutostartEnabled { get; set; } = false;
+    public bool StartMinimized { get; set; } = false;
     public bool IsAutostartEnabled() => AutostartEnabled;
-    public void SetAutostart(bool enable) => AutostartEnabled = enable;
+    public void SetAutostart(bool enable, bool startMinimized = false)
+    {
+        AutostartEnabled = enable;
+        StartMinimized = startMinimized;
+    }
 }
 
 public class MainViewModelTests
@@ -172,5 +177,24 @@ public class MainViewModelTests
         });
 
         Assert.Contains(vm.Logs.Logs, entry => entry.Message == "Test log message from engine");
+    }
+
+    [Fact]
+    public void MainViewModel_StartOnBootAndStartMinimized_UpdatesSettingsAndAutostart()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        var vm = new MainViewModel(_settingsService, _processManager, _bonjourService, _autostartService);
+
+        vm.StartOnBoot = true;
+        vm.StartMinimized = true;
+
+        Assert.True(_settingsService.CurrentSettings.StartOnBoot);
+        Assert.True(_settingsService.CurrentSettings.StartMinimized);
+        Assert.True(_autostartService.AutostartEnabled);
+        Assert.True(_autostartService.StartMinimized);
+
+        vm.StartMinimized = false;
+        Assert.False(_settingsService.CurrentSettings.StartMinimized);
+        Assert.False(_autostartService.StartMinimized);
     }
 }
