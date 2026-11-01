@@ -32,6 +32,20 @@ public partial class MainWindow : Window
         if (DataContext is MainViewModel vm)
         {
             vm.InitializeHotkeys(this);
+
+            vm.Logs.Logs.CollectionChanged += (s, args) =>
+            {
+                if (args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && vm.Logs.AutoScroll)
+                {
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        if (LogsListView.Items.Count > 0)
+                        {
+                            LogsListView.ScrollIntoView(LogsListView.Items[^1]);
+                        }
+                    });
+                }
+            };
         }
     }
 

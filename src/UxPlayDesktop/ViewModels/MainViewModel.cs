@@ -518,6 +518,7 @@ public class MainViewModel : ViewModelBase
 
         _settings = _settingsService.CurrentSettings;
         Logs = new LogsViewModel();
+        Logs.AddEntry(new LogEntry { Level = LogLevel.Info, Message = "UxPlay Desktop inicializado. Esperando inicio de sesión o conexiones AirPlay..." });
 
         ApplyAccentColor(AccentColor);
         UpdateWindowDimensions(_settings.CompactMode);

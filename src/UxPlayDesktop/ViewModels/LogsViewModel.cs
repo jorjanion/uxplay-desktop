@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -16,8 +17,18 @@ public class LogsViewModel : ViewModelBase
     private string _searchFilter = string.Empty;
     private LogLevel? _selectedLevelFilter;
     private bool _autoScroll = true;
+    private readonly ICollectionView? _filteredLogsView;
 
     public ObservableCollection<LogEntry> Logs => _allLogs;
+    public ICollectionView FilteredLogs => _filteredLogsView ?? CollectionViewSource.GetDefaultView(_allLogs);
+
+    public bool HasLogs => _allLogs.Count > 0;
+
+    public string FilterText
+    {
+        get => _searchFilter;
+        set => SearchFilter = value;
+    }
 
     public string SearchFilter
     {
@@ -26,6 +37,7 @@ public class LogsViewModel : ViewModelBase
         {
             if (SetField(ref _searchFilter, value))
             {
+                OnPropertyChanged(nameof(FilterText));
                 RefreshFilter();
             }
         }
@@ -49,12 +61,19 @@ public class LogsViewModel : ViewModelBase
         set => SetField(ref _autoScroll, value);
     }
 
+    public ICommand CopyCommand => CopyLogsCommand;
+    public ICommand ClearCommand => ClearLogsCommand;
     public ICommand ClearLogsCommand { get; }
     public ICommand CopyLogsCommand { get; }
 
     public LogsViewModel()
     {
         BindingOperations.EnableCollectionSynchronization(_allLogs, _logsLock);
+        try
+        {
+            _filteredLogsView = CollectionViewSource.GetDefaultView(_allLogs);
+        }
+        catch { }
 
         ClearLogsCommand = new RelayCommand(ClearLogs);
         CopyLogsCommand = new RelayCommand(CopyLogs);
@@ -71,17 +90,19 @@ public class LogsViewModel : ViewModelBase
             }
             _allLogs.Add(entry);
         }
+        OnPropertyChanged(nameof(HasLogs));
     }
 
-    private void ClearLogs()
+    public void ClearLogs()
     {
         lock (_logsLock)
         {
             _allLogs.Clear();
         }
+        OnPropertyChanged(nameof(HasLogs));
     }
 
-    private void CopyLogs()
+    public void CopyLogs()
     {
         lock (_logsLock)
         {
@@ -104,24 +125,32 @@ public class LogsViewModel : ViewModelBase
 
     private void RefreshFilter()
     {
-        var view = CollectionViewSource.GetDefaultView(_allLogs);
+        var view = _filteredLogsView ?? CollectionViewSource.GetDefaultView(_allLogs);
         if (view == null) return;
 
-        view.Filter = item =>
+        if (string.IsNullOrWhiteSpace(_searchFilter) && !_selectedLevelFilter.HasValue)
         {
-            if (item is not LogEntry entry) return false;
-
-            if (_selectedLevelFilter.HasValue && entry.Level != _selectedLevelFilter.Value)
+            view.Filter = null;
+        }
+        else
+        {
+            view.Filter = item =>
             {
-                return false;
-            }
+                if (item is not LogEntry entry) return false;
 
-            if (!string.IsNullOrWhiteSpace(_searchFilter))
-            {
-                return entry.Message.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase);
-            }
+                if (_selectedLevelFilter.HasValue && entry.Level != _selectedLevelFilter.Value)
+                {
+                    return false;
+                }
 
-            return true;
-        };
+                if (!string.IsNullOrWhiteSpace(_searchFilter))
+                {
+                    return entry.Message.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase);
+                }
+
+                return true;
+            };
+        }
+        view.Refresh();
     }
 }

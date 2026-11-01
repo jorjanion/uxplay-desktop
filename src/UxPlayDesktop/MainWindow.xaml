@@ -703,6 +703,11 @@
                                      Margin="0,0,10,0" />
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding Logs.AutoScroll}"
+                                          Content="{Binding Loc[LogsAutoScroll]}"
+                                          Foreground="{StaticResource TextSecondaryBrush}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,12,0" />
                                 <Button Command="{Binding Logs.CopyCommand}"
                                         Style="{StaticResource SecondaryButtonStyle}"
                                         Content="{Binding Loc[LogsCopy]}"
@@ -715,29 +720,40 @@
 
                         <!-- Logs List -->
                         <Border Grid.Row="1" Background="#111111" CornerRadius="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Padding="8">
-                            <ListView ItemsSource="{Binding Logs.FilteredLogs}"
-                                       Background="Transparent"
-                                       BorderThickness="0"
-                                       Foreground="White"
-                                       FontFamily="Consolas, Cascadia Code, Courier New"
-                                       FontSize="12">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0,2">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="90" />
-                                                <ColumnDefinition Width="65" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding FormattedTime}" Foreground="#777777" />
-                                            <Border Grid.Column="1" Background="{Binding BadgeColor}" CornerRadius="3" Padding="4,1" HorizontalAlignment="Left" Margin="0,0,6,0">
-                                                <TextBlock Text="{Binding Level}" FontSize="10" FontWeight="Bold" Foreground="White" />
-                                            </Border>
-                                            <TextBlock Grid.Column="2" Text="{Binding Message}" Foreground="White" TextWrapping="Wrap" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
+                            <Grid>
+                                <TextBlock Text="{Binding Loc[LogsWaitingPlaceholder]}"
+                                           Foreground="#666666"
+                                           FontStyle="Italic"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Visibility="{Binding Logs.HasLogs, Converter={x:Static models:InverseBoolToVisibilityConverter.Instance}}" />
+
+                                <ListView x:Name="LogsListView"
+                                           ItemsSource="{Binding Logs.FilteredLogs}"
+                                           Background="Transparent"
+                                           BorderThickness="0"
+                                           Foreground="White"
+                                           FontFamily="Consolas, Cascadia Code, Courier New"
+                                           FontSize="12">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="90" />
+                                                    <ColumnDefinition Width="65" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding FormattedTime}" Foreground="#777777" />
+                                                <Border Grid.Column="1" Background="{Binding BadgeColor}" CornerRadius="3" Padding="4,1" HorizontalAlignment="Left" Margin="0,0,6,0">
+                                                    <TextBlock Text="{Binding Level}" FontSize="10" FontWeight="Bold" Foreground="White" />
+                                                </Border>
+                                                <TextBlock Grid.Column="2" Text="{Binding Message}" Foreground="White" TextWrapping="Wrap" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Grid>
                         </Border>
                     </Grid>
                 </TabItem>
