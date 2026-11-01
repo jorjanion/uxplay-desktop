@@ -9,7 +9,7 @@
         Title="UxPlay Desktop - AirPlay Mirroring"
         Icon="resources/newicon.ico"
         Height="{Binding WindowHeight, Mode=TwoWay}" Width="{Binding WindowWidth, Mode=TwoWay}"
-        MinHeight="{Binding WindowMinHeight}" MinWidth="{Binding WindowMinWidth}"
+        MinHeight="{Binding WindowMinHeight, Mode=OneWay}" MinWidth="{Binding WindowMinWidth, Mode=OneWay}"
         Background="{StaticResource AppBackgroundBrush}"
         WindowStartupLocation="CenterScreen">
 

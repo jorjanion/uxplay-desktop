@@ -11,6 +11,23 @@ public partial class App : Application
     private ICoreProcessManager? _processManager;
     private static Mutex? _singleInstanceMutex;
 
+    public App()
+    {
+        DispatcherUnhandledException += (s, e) =>
+        {
+            try
+            {
+                var dir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "UxPlayDesktop");
+                System.IO.Directory.CreateDirectory(dir);
+                System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "crash.log"), e.Exception.ToString());
+                MessageBox.Show($"Ha ocurrido un error inesperado en UxPlay Desktop:\n\n{e.Exception.Message}\n\nLos detalles se han guardado en crash.log.", "UxPlay Desktop - Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch { }
+            e.Handled = true;
+            Shutdown(1);
+        };
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         const string mutexName = "Local\\UxPlayDesktop_SingleInstance_Mutex";

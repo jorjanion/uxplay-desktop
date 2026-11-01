@@ -287,6 +287,11 @@ public class MainViewModel : ViewModelBase
         "#F43F5E"  // Rose Red
     ];
 
+    private double _windowWidth = 1020;
+    private double _windowHeight = 740;
+    private double _windowMinWidth = 860;
+    private double _windowMinHeight = 620;
+
     public bool IsCompactMode
     {
         get => Settings.CompactMode;
@@ -296,19 +301,53 @@ public class MainViewModel : ViewModelBase
             {
                 Settings.CompactMode = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(WindowWidth));
-                OnPropertyChanged(nameof(WindowHeight));
-                OnPropertyChanged(nameof(WindowMinWidth));
-                OnPropertyChanged(nameof(WindowMinHeight));
+                UpdateWindowDimensions(value);
                 SaveSettings();
             }
         }
     }
 
-    public double WindowWidth => IsCompactMode ? 620 : 1020;
-    public double WindowHeight => IsCompactMode ? 140 : 740;
-    public double WindowMinWidth => IsCompactMode ? 480 : 860;
-    public double WindowMinHeight => IsCompactMode ? 120 : 620;
+    private void UpdateWindowDimensions(bool compact)
+    {
+        if (compact)
+        {
+            WindowMinWidth = 480;
+            WindowMinHeight = 120;
+            WindowWidth = 620;
+            WindowHeight = 140;
+        }
+        else
+        {
+            WindowMinWidth = 860;
+            WindowMinHeight = 620;
+            WindowWidth = 1020;
+            WindowHeight = 740;
+        }
+    }
+
+    public double WindowWidth
+    {
+        get => _windowWidth;
+        set => SetField(ref _windowWidth, value);
+    }
+
+    public double WindowHeight
+    {
+        get => _windowHeight;
+        set => SetField(ref _windowHeight, value);
+    }
+
+    public double WindowMinWidth
+    {
+        get => _windowMinWidth;
+        set => SetField(ref _windowMinWidth, value);
+    }
+
+    public double WindowMinHeight
+    {
+        get => _windowMinHeight;
+        set => SetField(ref _windowMinHeight, value);
+    }
 
     public IReadOnlyList<DisplayInfo> AvailableDisplays => _windowService.GetConnectedDisplays();
 
@@ -481,6 +520,7 @@ public class MainViewModel : ViewModelBase
         Logs = new LogsViewModel();
 
         ApplyAccentColor(AccentColor);
+        UpdateWindowDimensions(_settings.CompactMode);
 
         Loc.SetLanguage(_settings.Language);
         Loc.PropertyChanged += (_, _) =>
