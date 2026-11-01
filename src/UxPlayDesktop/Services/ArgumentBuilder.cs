@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using UxPlayDesktop.Models;
@@ -92,7 +93,7 @@ public class ArgumentBuilder : IArgumentBuilder
         }
 
         // Audio
-        if (!settings.EnableAudio)
+        if (!settings.EnableAudio || settings.IsMuted)
         {
             args.Add("-as");
             args.Add("0");
@@ -110,6 +111,25 @@ public class ArgumentBuilder : IArgumentBuilder
                 args.Add("-as");
                 args.Add(settings.AudioSink);
             }
+            if (settings.AudioVolume >= 0.0 && settings.AudioVolume < 0.99)
+            {
+                var vol = Math.Clamp(settings.AudioVolume, 0.0, 1.0);
+                args.Add("-vol");
+                args.Add(vol.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+            }
+        }
+
+        // MP4 Recording
+        if (settings.EnableRecording)
+        {
+            var dir = string.IsNullOrWhiteSpace(settings.RecordingDirectory)
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "UxPlay")
+                : settings.RecordingDirectory;
+
+            try { Directory.CreateDirectory(dir); } catch { }
+            var baseFileName = Path.Combine(dir, "AirPlay_Recording");
+            args.Add("-mp4");
+            args.Add(baseFileName);
         }
 
         // Security / Pairing

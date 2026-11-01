@@ -176,4 +176,51 @@ public class ArgumentBuilderTests
         Assert.Equal("-fps", tokens[4]);
         Assert.Equal("60", tokens[5]);
     }
+
+    [Fact]
+    public void BuildArguments_RecordingEnabled_AddsMp4FlagAndPath()
+    {
+        var settings = new AppSettings
+        {
+            EnableRecording = true,
+            RecordingDirectory = @"C:\TestRecordings"
+        };
+
+        var args = _builder.BuildArguments(settings).ToList();
+        var mp4Index = args.IndexOf("-mp4");
+
+        Assert.True(mp4Index >= 0);
+        Assert.Equal(@"C:\TestRecordings\AirPlay_Recording", args[mp4Index + 1]);
+    }
+
+    [Fact]
+    public void BuildArguments_Muted_AddsAudioSinkZero()
+    {
+        var settings = new AppSettings
+        {
+            IsMuted = true
+        };
+
+        var args = _builder.BuildArguments(settings).ToList();
+        var asIndex = args.IndexOf("-as");
+
+        Assert.True(asIndex >= 0);
+        Assert.Equal("0", args[asIndex + 1]);
+    }
+
+    [Fact]
+    public void BuildArguments_VolumeControl_AddsVolFlag()
+    {
+        var settings = new AppSettings
+        {
+            IsMuted = false,
+            AudioVolume = 0.65
+        };
+
+        var args = _builder.BuildArguments(settings).ToList();
+        var volIndex = args.IndexOf("-vol");
+
+        Assert.True(volIndex >= 0);
+        Assert.Equal("0.65", args[volIndex + 1]);
+    }
 }

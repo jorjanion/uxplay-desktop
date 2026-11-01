@@ -29,6 +29,10 @@ public partial class MainWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         InitializeTray();
+        if (DataContext is MainViewModel vm)
+        {
+            vm.InitializeHotkeys(this);
+        }
     }
 
     public void RequestCloseAndExit()
@@ -39,7 +43,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(CancelEventArgs e)
     {
-        if (!_isExplicitExit && DataContext is MainViewModel vm && vm.Settings.MinimizeToTray)
+        if (DataContext is MainViewModel vmExit && !_isExplicitExit && vmExit.Settings.MinimizeToTray)
         {
             e.Cancel = true;
             WindowState = WindowState.Minimized;
@@ -47,6 +51,11 @@ public partial class MainWindow : Window
             Hide();
             _trayService?.ShowNotification("UxPlay Desktop", "UxPlay is running in the background. Click this tray icon to restore.");
             return;
+        }
+
+        if (DataContext is MainViewModel vmCleanup)
+        {
+            vmCleanup.DisposeHotkeys();
         }
 
         _trayService?.Dispose();

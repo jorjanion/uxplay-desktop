@@ -23,7 +23,7 @@
 
         <!-- Modern Primary Button -->
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="14" />

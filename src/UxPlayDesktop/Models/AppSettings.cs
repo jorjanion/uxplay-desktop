@@ -23,12 +23,28 @@ public class AppSettings
     public bool EnableH265 { get; set; } = true;
     public bool ForceFullscreen { get; set; } = false;
     public bool BorderlessWindow { get; set; } = true; // Clean borderless display mode
+    public bool AlwaysOnTop { get; set; } = false; // Floating picture-in-picture mode
+    public int TargetDisplayIndex { get; set; } = 0; // 0 for primary monitor
     public string VideoSink { get; set; } = "d3d11videosink"; // d3d11videosink, d3d12videosink, autovideosink
 
     // Audio Configuration
     public bool EnableAudio { get; set; } = true;
     public int AudioDelayMs { get; set; } = 0; // Audio/Video sync calibration
+    public double AudioVolume { get; set; } = 1.0; // 0.0 to 1.0
+    public bool IsMuted { get; set; } = false;
     public string AudioSink { get; set; } = "autoaudiosink"; // autoaudiosink, wasapisink
+
+    // Recording & Captures
+    public bool EnableRecording { get; set; } = false;
+    public string RecordingDirectory { get; set; } = string.Empty;
+    public string ScreenshotsDirectory { get; set; } = string.Empty;
+
+    // Hotkeys & Productivity
+    public bool EnableGlobalHotkeys { get; set; } = true;
+
+    // Appearance & Personalization
+    public string AccentColor { get; set; } = "#38BDF8"; // Sky Blue (default)
+    public bool CompactMode { get; set; } = false;
 
     // Security & Pairing
     public bool RequirePin { get; set; } = false;

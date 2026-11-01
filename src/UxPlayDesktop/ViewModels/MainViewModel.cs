@@ -17,6 +17,9 @@ public class MainViewModel : ViewModelBase
     private readonly IBonjourService _bonjourService;
     private readonly IAutostartService _autostartService;
     private readonly IUpdateService _updateService;
+    private readonly INetworkDiagnosticService _diagnosticService;
+    private readonly IWindowManagementService _windowService;
+    private readonly IGlobalHotkeyService _hotkeyService;
     private readonly DispatcherTimer _sessionTimer;
 
     private AppSettings _settings;
@@ -31,6 +34,12 @@ public class MainViewModel : ViewModelBase
     private string _updateVersionText = "";
     private bool _isUpdating;
     private int _updateProgress;
+
+    private bool _isRunningDiagnostic;
+    private bool _showDiagnosticDialog;
+    private NetworkDiagnosticReport? _diagnosticReport;
+    private string? _lastScreenshotPath;
+    private string? _screenshotNotification;
 
     public AppSettings Settings
     {
@@ -142,7 +151,7 @@ public class MainViewModel : ViewModelBase
     public string DisplayTargetFps => string.Format(Loc["TargetFpsFormat"], Settings.TargetFps);
     public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
     public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
-    public string AppVersionDisplay => "UxPlay Desktop v1.1.6";
+    public string AppVersionDisplay => "UxPlay Desktop v1.1.7";
     public string LocalNetworkInfo => GetLocalNetworkInfo();
 
     public bool StartOnBoot
@@ -171,6 +180,181 @@ public class MainViewModel : ViewModelBase
                 SaveSettings();
             }
         }
+    }
+
+    public bool IsRecording
+    {
+        get => Settings.EnableRecording;
+        set
+        {
+            if (Settings.EnableRecording != value)
+            {
+                Settings.EnableRecording = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(RecordButtonText));
+                SaveSettings();
+            }
+        }
+    }
+
+    public string RecordButtonText => IsRecording ? Loc["StopRecordButton"] : Loc["RecordButton"];
+
+    public double AudioVolume
+    {
+        get => Settings.AudioVolume;
+        set
+        {
+            var clamped = Math.Clamp(value, 0.0, 1.0);
+            if (Math.Abs(Settings.AudioVolume - clamped) > 0.001)
+            {
+                Settings.AudioVolume = clamped;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(VolumeDisplay));
+                SaveSettings();
+            }
+        }
+    }
+
+    public bool IsMuted
+    {
+        get => Settings.IsMuted;
+        set
+        {
+            if (Settings.IsMuted != value)
+            {
+                Settings.IsMuted = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(VolumeDisplay));
+                OnPropertyChanged(nameof(MuteButtonText));
+                SaveSettings();
+            }
+        }
+    }
+
+    public string VolumeDisplay => IsMuted ? Loc["MuteButton"] : $"{(int)(AudioVolume * 100)}%";
+    public string MuteButtonText => IsMuted ? Loc["UnmuteButton"] : Loc["MuteButton"];
+
+    public bool AlwaysOnTop
+    {
+        get => Settings.AlwaysOnTop;
+        set
+        {
+            if (Settings.AlwaysOnTop != value)
+            {
+                Settings.AlwaysOnTop = value;
+                OnPropertyChanged();
+                _windowService.SetAlwaysOnTop(value);
+                SaveSettings();
+            }
+        }
+    }
+
+    public bool EnableGlobalHotkeys
+    {
+        get => Settings.EnableGlobalHotkeys;
+        set
+        {
+            if (Settings.EnableGlobalHotkeys != value)
+            {
+                Settings.EnableGlobalHotkeys = value;
+                OnPropertyChanged();
+                SaveSettings();
+            }
+        }
+    }
+
+    public string AccentColor
+    {
+        get => string.IsNullOrWhiteSpace(Settings.AccentColor) ? "#38BDF8" : Settings.AccentColor;
+        set
+        {
+            if (Settings.AccentColor != value)
+            {
+                Settings.AccentColor = value;
+                OnPropertyChanged();
+                ApplyAccentColor(value);
+                SaveSettings();
+            }
+        }
+    }
+
+    public IReadOnlyList<string> AvailableAccentColors { get; } =
+    [
+        "#38BDF8", // Sky Blue
+        "#A855F7", // Neon Purple
+        "#22C55E", // Emerald Green
+        "#F59E0B", // Amber Gold
+        "#F43F5E"  // Rose Red
+    ];
+
+    public bool IsCompactMode
+    {
+        get => Settings.CompactMode;
+        set
+        {
+            if (Settings.CompactMode != value)
+            {
+                Settings.CompactMode = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WindowWidth));
+                OnPropertyChanged(nameof(WindowHeight));
+                OnPropertyChanged(nameof(WindowMinWidth));
+                OnPropertyChanged(nameof(WindowMinHeight));
+                SaveSettings();
+            }
+        }
+    }
+
+    public double WindowWidth => IsCompactMode ? 620 : 1020;
+    public double WindowHeight => IsCompactMode ? 140 : 740;
+    public double WindowMinWidth => IsCompactMode ? 480 : 860;
+    public double WindowMinHeight => IsCompactMode ? 120 : 620;
+
+    public IReadOnlyList<DisplayInfo> AvailableDisplays => _windowService.GetConnectedDisplays();
+
+    public DisplayInfo? SelectedDisplay
+    {
+        get => AvailableDisplays.FirstOrDefault(d => d.Index == Settings.TargetDisplayIndex) ?? AvailableDisplays.FirstOrDefault();
+        set
+        {
+            if (value != null && Settings.TargetDisplayIndex != value.Index)
+            {
+                Settings.TargetDisplayIndex = value.Index;
+                OnPropertyChanged();
+                _windowService.MoveVideoWindowToDisplay(value.Index);
+                SaveSettings();
+            }
+        }
+    }
+
+    public bool IsRunningDiagnostic
+    {
+        get => _isRunningDiagnostic;
+        set => SetField(ref _isRunningDiagnostic, value);
+    }
+
+    public bool ShowDiagnosticDialog
+    {
+        get => _showDiagnosticDialog;
+        set => SetField(ref _showDiagnosticDialog, value);
+    }
+
+    public NetworkDiagnosticReport? DiagnosticReport
+    {
+        get => _diagnosticReport;
+        set => SetField(ref _diagnosticReport, value);
+    }
+
+    public string? LastScreenshotPath
+    {
+        get => _lastScreenshotPath;
+        set => SetField(ref _lastScreenshotPath, value);
+    }
+
+    public string? ScreenshotNotification
+    {
+        get => _screenshotNotification;
+        set => SetField(ref _screenshotNotification, value);
     }
 
     public string StatusColor => ServerState switch
@@ -264,21 +448,39 @@ public class MainViewModel : ViewModelBase
     public ICommand ApplyUpdateCommand { get; }
     public ICommand DismissUpdateCommand { get; }
 
+    public ICommand ToggleRecordingCommand { get; }
+    public ICommand OpenRecordingsFolderCommand { get; }
+    public ICommand CaptureScreenshotCommand { get; }
+    public ICommand ToggleMuteCommand { get; }
+    public ICommand ToggleAlwaysOnTopCommand { get; }
+    public ICommand ToggleCompactModeCommand { get; }
+    public ICommand RunDiagnosticCommand { get; }
+    public ICommand CloseDiagnosticCommand { get; }
+    public ICommand SetAccentColorCommand { get; }
+
     public MainViewModel(
         ISettingsService settingsService,
         ICoreProcessManager processManager,
         IBonjourService bonjourService,
         IAutostartService autostartService,
-        IUpdateService? updateService = null)
+        IUpdateService? updateService = null,
+        INetworkDiagnosticService? diagnosticService = null,
+        IWindowManagementService? windowService = null,
+        IGlobalHotkeyService? hotkeyService = null)
     {
         _settingsService = settingsService;
         _processManager = processManager;
         _bonjourService = bonjourService;
         _autostartService = autostartService;
         _updateService = updateService ?? new UpdateService();
+        _diagnosticService = diagnosticService ?? new NetworkDiagnosticService(_bonjourService);
+        _windowService = windowService ?? new WindowManagementService();
+        _hotkeyService = hotkeyService ?? new GlobalHotkeyService();
 
         _settings = _settingsService.CurrentSettings;
         Logs = new LogsViewModel();
+
+        ApplyAccentColor(AccentColor);
 
         Loc.SetLanguage(_settings.Language);
         Loc.PropertyChanged += (_, _) =>
@@ -294,6 +496,9 @@ public class MainViewModel : ViewModelBase
             OnPropertyChanged(nameof(DisplayAudioDelay));
             OnPropertyChanged(nameof(DisplayStep3Desc));
             OnPropertyChanged(nameof(SelectedLanguage));
+            OnPropertyChanged(nameof(RecordButtonText));
+            OnPropertyChanged(nameof(VolumeDisplay));
+            OnPropertyChanged(nameof(MuteButtonText));
         };
 
         _processManager.StateChanged += state => RunOnUi(() => ServerState = state);
@@ -307,6 +512,29 @@ public class MainViewModel : ViewModelBase
         DismissPinCommand = new RelayCommand(() => ActivePinCode = null);
         ApplyUpdateCommand = new RelayCommand(async () => await ApplyUpdateAsync());
         DismissUpdateCommand = new RelayCommand(() => IsUpdateAvailable = false);
+
+        ToggleRecordingCommand = new RelayCommand(async () => await ToggleRecordingAsync());
+        OpenRecordingsFolderCommand = new RelayCommand(OpenRecordingsFolder);
+        CaptureScreenshotCommand = new RelayCommand(CaptureScreenshot);
+        ToggleMuteCommand = new RelayCommand(ToggleMute);
+        ToggleAlwaysOnTopCommand = new RelayCommand(ToggleAlwaysOnTop);
+        ToggleCompactModeCommand = new RelayCommand(ToggleCompactMode);
+        RunDiagnosticCommand = new RelayCommand(async () => await RunDiagnosticsAsync());
+        CloseDiagnosticCommand = new RelayCommand(() => ShowDiagnosticDialog = false);
+        SetAccentColorCommand = new RelayCommand(color => { if (color is string hex) AccentColor = hex; });
+
+        // Global hotkey events
+        _hotkeyService.OnToggleFullscreen += () => RunOnUi(() =>
+        {
+            Settings.ForceFullscreen = !Settings.ForceFullscreen;
+            OnPropertyChanged(nameof(Settings));
+            SaveSettings();
+        });
+        _hotkeyService.OnToggleMute += () => RunOnUi(ToggleMute);
+        _hotkeyService.OnToggleRecording += () => RunOnUi(async () => await ToggleRecordingAsync());
+        _hotkeyService.OnToggleServer += () => RunOnUi(async () => await ToggleServerAsync());
+        _hotkeyService.OnToggleAlwaysOnTop += () => RunOnUi(ToggleAlwaysOnTop);
+        _hotkeyService.OnCaptureScreenshot += () => RunOnUi(CaptureScreenshot);
 
         _sessionTimer = new DispatcherTimer
         {
@@ -473,6 +701,101 @@ public class MainViewModel : ViewModelBase
         {
             FormattedDuration = "00:00:00";
         }
+    }
+
+    public void InitializeHotkeys(Window window)
+    {
+        if (Settings.EnableGlobalHotkeys)
+        {
+            _hotkeyService.Initialize(window);
+        }
+    }
+
+    public void DisposeHotkeys()
+    {
+        _hotkeyService.Dispose();
+    }
+
+    private async Task ToggleRecordingAsync()
+    {
+        IsRecording = !IsRecording;
+        if (IsServerRunning)
+        {
+            await _processManager.StopAsync();
+            await StartServerAsync();
+        }
+    }
+
+    private void OpenRecordingsFolder()
+    {
+        try
+        {
+            var dir = string.IsNullOrWhiteSpace(Settings.RecordingDirectory)
+                ? System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "UxPlay")
+                : Settings.RecordingDirectory;
+
+            System.IO.Directory.CreateDirectory(dir);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = dir,
+                UseShellExecute = true
+            });
+        }
+        catch { }
+    }
+
+    private void CaptureScreenshot()
+    {
+        var path = _windowService.CaptureScreenshot(Settings.ScreenshotsDirectory);
+        if (!string.IsNullOrEmpty(path))
+        {
+            LastScreenshotPath = path;
+            ScreenshotNotification = Loc["ScreenshotSaved"];
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(4000);
+                RunOnUi(() => ScreenshotNotification = null);
+            });
+        }
+    }
+
+    private void ToggleMute()
+    {
+        IsMuted = !IsMuted;
+    }
+
+    private void ToggleAlwaysOnTop()
+    {
+        AlwaysOnTop = !AlwaysOnTop;
+    }
+
+    private void ToggleCompactMode()
+    {
+        IsCompactMode = !IsCompactMode;
+    }
+
+    private async Task RunDiagnosticsAsync()
+    {
+        ShowDiagnosticDialog = true;
+        IsRunningDiagnostic = true;
+        DiagnosticReport = await _diagnosticService.RunDiagnosticsAsync();
+        IsRunningDiagnostic = false;
+    }
+
+    public static void ApplyAccentColor(string hex)
+    {
+        try
+        {
+            var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+            var brush = new System.Windows.Media.SolidColorBrush(color);
+            brush.Freeze();
+            if (Application.Current != null)
+            {
+                Application.Current.Resources["AccentBrush"] = brush;
+                Application.Current.Resources["PrimaryBrush"] = brush;
+            }
+        }
+        catch { }
     }
 
     private static void RunOnUi(Action action)

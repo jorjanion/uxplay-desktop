@@ -197,4 +197,52 @@ public class MainViewModelTests
         Assert.False(_settingsService.CurrentSettings.StartMinimized);
         Assert.False(_autostartService.StartMinimized);
     }
+
+    [Fact]
+    public void MainViewModel_AccentColor_UpdatesSettingsAndProperty()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        var vm = new MainViewModel(_settingsService, _processManager, _bonjourService, _autostartService);
+
+        vm.SetAccentColorCommand.Execute("#A855F7");
+        Assert.Equal("#A855F7", vm.AccentColor);
+        Assert.Equal("#A855F7", _settingsService.CurrentSettings.AccentColor);
+    }
+
+    [Fact]
+    public void MainViewModel_VolumeAndMute_TogglesMuteState()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        var vm = new MainViewModel(_settingsService, _processManager, _bonjourService, _autostartService);
+
+        vm.IsMuted = false;
+        vm.AudioVolume = 0.8;
+        Assert.False(vm.IsMuted);
+        Assert.Equal(0.8, vm.AudioVolume);
+
+        vm.ToggleMuteCommand.Execute(null);
+        Assert.True(vm.IsMuted);
+        Assert.True(_settingsService.CurrentSettings.IsMuted);
+
+        vm.ToggleMuteCommand.Execute(null);
+        Assert.False(vm.IsMuted);
+    }
+
+    [Fact]
+    public void MainViewModel_CompactMode_TogglesDimensions()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        var vm = new MainViewModel(_settingsService, _processManager, _bonjourService, _autostartService);
+
+        Assert.False(vm.IsCompactMode);
+        Assert.Equal(740, vm.WindowHeight);
+
+        vm.ToggleCompactModeCommand.Execute(null);
+        Assert.True(vm.IsCompactMode);
+        Assert.Equal(140, vm.WindowHeight);
+
+        vm.ToggleCompactModeCommand.Execute(null);
+        Assert.False(vm.IsCompactMode);
+        Assert.Equal(740, vm.WindowHeight);
+    }
 }
