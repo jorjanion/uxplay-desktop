@@ -55,13 +55,16 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         [
             Path.Combine(appDir, "uxplay.exe"),
             Path.Combine(appDir, "runtimes", "win-x64", "native", "uxplay.exe"),
+            Path.Combine(appDir, "runtimes", "win-arm64", "native", "uxplay.exe"),
             Path.Combine(appDir, "core", "uxplay.exe"),
             Path.Combine(appDir, "bin", "uxplay.exe"),
             Path.Combine(appDir, "resources", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "runtimes", "win-x64", "native", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "runtimes", "win-arm64", "native", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "core", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "core", "build", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "..", "..", "..", "runtimes", "win-x64", "native", "uxplay.exe"),
+            Path.Combine(appDir, "..", "..", "..", "..", "..", "runtimes", "win-arm64", "native", "uxplay.exe"),
             Path.Combine(appDir, "..", "..", "..", "..", "..", "core", "uxplay.exe"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "UxPlayDesktop", "uxplay.exe"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UxPlayDesktop", "uxplay.exe")
@@ -422,7 +425,9 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
             [
                 appDir,
                 Path.Combine(appDir, "runtimes", "win-x64", "native"),
+                Path.Combine(appDir, "runtimes", "win-arm64", "native"),
                 Path.Combine(appDir, "core"),
+                @"C:\msys64\clangarm64\bin",
                 @"C:\msys64\ucrt64\bin",
                 @"C:\msys64\mingw64\bin",
                 @"C:\gstreamer\1.0\msvc_x86_64\bin",

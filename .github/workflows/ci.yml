@@ -10,10 +10,49 @@ on:
 
 jobs:
   build:
-    name: Build, Test & Package
-    runs-on: windows-latest
-    permissions:
-      contents: write
+    name: Build & Package (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: x64
+            runner: windows-latest
+            msystem: UCRT64
+            packages: >-
+              mingw-w64-ucrt-x86_64-cmake
+              mingw-w64-ucrt-x86_64-gcc
+              mingw-w64-ucrt-x86_64-binutils
+              mingw-w64-ucrt-x86_64-ninja
+              mingw-w64-ucrt-x86_64-libplist
+              mingw-w64-ucrt-x86_64-json-glib
+              mingw-w64-ucrt-x86_64-openssl
+              mingw-w64-ucrt-x86_64-gstreamer
+              mingw-w64-ucrt-x86_64-gst-plugins-base
+              mingw-w64-ucrt-x86_64-gst-plugins-good
+              mingw-w64-ucrt-x86_64-gst-plugins-bad
+              mingw-w64-ucrt-x86_64-gst-libav
+              mingw-w64-ucrt-x86_64-python
+              mingw-w64-ucrt-x86_64-python-gobject
+          - architecture: arm64
+            runner: windows-11-arm
+            msystem: CLANGARM64
+            packages: >-
+              mingw-w64-clang-aarch64-cmake
+              mingw-w64-clang-aarch64-gcc-compat
+              mingw-w64-clang-aarch64-libc++
+              mingw-w64-clang-aarch64-llvm-tools
+              mingw-w64-clang-aarch64-ninja
+              mingw-w64-clang-aarch64-libplist
+              mingw-w64-clang-aarch64-json-glib
+              mingw-w64-clang-aarch64-openssl
+              mingw-w64-clang-aarch64-gstreamer
+              mingw-w64-clang-aarch64-gst-plugins-base
+              mingw-w64-clang-aarch64-gst-plugins-good
+              mingw-w64-clang-aarch64-gst-plugins-bad
+              mingw-w64-clang-aarch64-gst-libav
+              mingw-w64-clang-aarch64-python
+              mingw-w64-clang-aarch64-python-gobject
 
     steps:
     - name: Checkout repository
@@ -21,24 +60,20 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup MSYS2 UCRT64
+    - name: Install Inno Setup
+      shell: powershell
+      run: |
+        if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") -and -not (Test-Path "$env:ProgramFiles\Inno Setup 6\ISCC.exe")) {
+          choco install innosetup --no-progress -y
+        }
+
+    - name: Setup MSYS2 ${{ matrix.msystem }}
+      id: msys2
       uses: msys2/setup-msys2@v2
       with:
-        msystem: UCRT64
+        msystem: ${{ matrix.msystem }}
         update: true
-        install: >-
-          mingw-w64-ucrt-x86_64-cmake
-          mingw-w64-ucrt-x86_64-gcc
-          mingw-w64-ucrt-x86_64-binutils
-          mingw-w64-ucrt-x86_64-ninja
-          mingw-w64-ucrt-x86_64-libplist
-          mingw-w64-ucrt-x86_64-json-glib
-          mingw-w64-ucrt-x86_64-openssl
-          mingw-w64-ucrt-x86_64-gstreamer
-          mingw-w64-ucrt-x86_64-gst-plugins-base
-          mingw-w64-ucrt-x86_64-gst-plugins-good
-          mingw-w64-ucrt-x86_64-gst-plugins-bad
-          mingw-w64-ucrt-x86_64-gst-libav
+        install: ${{ matrix.packages }}
 
     - name: Build Native UxPlay Core Engine
       shell: msys2 {0}
@@ -62,23 +97,43 @@ jobs:
 
     - name: Package Desktop Artifacts
       shell: pwsh
-      run: .\build.ps1 -Action package -Configuration Release
+      env:
+        MSYS2_ROOT: ${{ steps.msys2.outputs.msys2-location }}
+      run: .\build.ps1 -Action package -Architecture ${{ matrix.architecture }} -Configuration Release
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: UxPlayDesktop-Packages
-        path: |
-          out/artifacts/UxPlayDesktop-Setup.exe
-          out/artifacts/UxPlayDesktop-win-x64.zip
+        name: UxPlayDesktop-${{ matrix.architecture }}
+        path: out/artifacts/*
         retention-days: 14
 
+  release:
+    name: Publish Release Packages
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Download all build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release-artifacts
+
+    - name: Flatten release artifacts
+      shell: powershell
+      run: |
+        New-Item -ItemType Directory -Force -Path dist | Out-Null
+        Get-ChildItem -Path release-artifacts -Recurse -File | ForEach-Object {
+          Copy-Item -LiteralPath $_.FullName -Destination dist\ -Force
+        }
+        Get-ChildItem -Path dist
+
     - name: Publish GitHub Release
-      if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v2
       with:
-        files: |
-          out/artifacts/UxPlayDesktop-Setup.exe
-          out/artifacts/UxPlayDesktop-win-x64.zip
+        files: dist/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

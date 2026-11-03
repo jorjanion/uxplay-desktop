@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/jorjanion/uxplay-desktop/releases/latest"><img src="https://img.shields.io/github/v/release/jorjanion/uxplay-desktop?color=blue&label=Latest%20Version" alt="Release"></a>
   <a href="https://github.com/jorjanion/uxplay-desktop/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-GPL%20v3.0-green.svg" alt="License"></a>
-  <img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078D6?logo=windows" alt="Platform">
+  <img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64%20%2F%20ARM64)-0078D6?logo=windows" alt="Platform">
   <img src="https://img.shields.io/badge/.NET-8.0%20Self--Contained-512BD4?logo=dotnet" alt=".NET 8">
   <img src="https://img.shields.io/badge/Direct3D-11%20%2F%2012%20Hardware-orange" alt="Direct3D">
   <img src="https://img.shields.io/badge/Cost-%E2%82%AC0%20Free%20%26%20Open%20Source-brightgreen" alt="Cost">

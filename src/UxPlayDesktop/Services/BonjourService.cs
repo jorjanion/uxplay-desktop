@@ -67,8 +67,10 @@ public class BonjourService : IBonjourService
             var mdnsExe = Path.Combine(appDir, "mDNSResponder.exe");
             if (!File.Exists(mdnsExe))
             {
-                var cand = Path.Combine(appDir, "runtimes", "win-x64", "native", "mDNSResponder.exe");
-                if (File.Exists(cand)) mdnsExe = cand;
+                var candX64 = Path.Combine(appDir, "runtimes", "win-x64", "native", "mDNSResponder.exe");
+                var candArm64 = Path.Combine(appDir, "runtimes", "win-arm64", "native", "mDNSResponder.exe");
+                if (File.Exists(candX64)) mdnsExe = candX64;
+                else if (File.Exists(candArm64)) mdnsExe = candArm64;
             }
 
             if (File.Exists(mdnsExe))

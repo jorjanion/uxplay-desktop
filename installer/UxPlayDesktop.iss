@@ -1,6 +1,20 @@
 ; UxPlay Desktop - Inno Setup Script
 ; High-performance, self-contained Windows AirPlay installer
 
+#ifndef AppArch
+#define AppArch "x64"
+#endif
+
+#if AppArch == "arm64"
+  #define SetupArchAllowed "arm64"
+  #define SetupArch64BitMode "arm64"
+  #define OutputName "UxPlayDesktop-arm64-Setup"
+#else
+  #define SetupArchAllowed "x64compatible"
+  #define SetupArch64BitMode "x64compatible"
+  #define OutputName "UxPlayDesktop-x64-Setup"
+#endif
+
 #define MyAppName "UxPlay Desktop"
 #define MyAppVersion "1.1.7"
 #define MyAppPublisher "jorjanion"
@@ -20,14 +34,14 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\LICENSE
 OutputDir=..\out\artifacts
-OutputBaseFilename=UxPlayDesktop-Setup
+OutputBaseFilename={#OutputName}
 SetupIconFile=..\resources\newicon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
-ArchitecturesInstallIn64BitMode=x64compatible
-ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode={#SetupArch64BitMode}
+ArchitecturesAllowed={#SetupArchAllowed}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 CloseApplications=force
 RestartApplications=no

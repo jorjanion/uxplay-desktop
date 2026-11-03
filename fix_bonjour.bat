@@ -35,6 +35,7 @@ if not defined MDNS_SRC if exist "%~dp0resources\mDNSResponder.exe" set "MDNS_SR
 if not defined MDNS_SRC if exist "%~dp0..\mDNSResponder.exe" set "MDNS_SRC=%~dp0..\mDNSResponder.exe"
 if not defined MDNS_SRC if exist "%~dp0out\publish\mDNSResponder.exe" set "MDNS_SRC=%~dp0out\publish\mDNSResponder.exe"
 if not defined MDNS_SRC if exist "%~dp0runtimes\win-x64\native\mDNSResponder.exe" set "MDNS_SRC=%~dp0runtimes\win-x64\native\mDNSResponder.exe"
+if not defined MDNS_SRC if exist "%~dp0runtimes\win-arm64\native\mDNSResponder.exe" set "MDNS_SRC=%~dp0runtimes\win-arm64\native\mDNSResponder.exe"
 
 if not defined MDNS_SRC (
     if "%IS_SILENT%"=="0" (
@@ -58,6 +59,7 @@ if exist "%~dp0resources\dnssd.dll" copy /y "%~dp0resources\dnssd.dll" "%Program
 if exist "%~dp0..\dnssd.dll" copy /y "%~dp0..\dnssd.dll" "%ProgramFiles%\Bonjour\dnssd.dll" >nul
 if exist "%~dp0out\publish\dnssd.dll" copy /y "%~dp0out\publish\dnssd.dll" "%ProgramFiles%\Bonjour\dnssd.dll" >nul
 if exist "%~dp0runtimes\win-x64\native\dnssd.dll" copy /y "%~dp0runtimes\win-x64\native\dnssd.dll" "%ProgramFiles%\Bonjour\dnssd.dll" >nul
+if exist "%~dp0runtimes\win-arm64\native\dnssd.dll" copy /y "%~dp0runtimes\win-arm64\native\dnssd.dll" "%ProgramFiles%\Bonjour\dnssd.dll" >nul
 
 if "%IS_SILENT%"=="0" echo [3/5] Registrando servicio Bonjour en Windows Service Control Manager...
 "%ProgramFiles%\Bonjour\mDNSResponder.exe" -install >nul 2>&1
