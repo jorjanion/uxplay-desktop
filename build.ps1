@@ -196,14 +196,6 @@ switch ($Action) {
                 throw "Inno Setup compilation failed with exit code $LASTEXITCODE"
             }
             Write-Host "Native Setup Installer created successfully: $setupExeName" -ForegroundColor Green
-
-            if ($Architecture -eq "x64") {
-                $archSetup = Join-Path $artifactDir "UxPlayDesktop-x64-Setup.exe"
-                $genericSetup = Join-Path $artifactDir "UxPlayDesktop-Setup.exe"
-                if (Test-Path $archSetup) {
-                    Copy-Item -LiteralPath $archSetup -Destination $genericSetup -Force
-                }
-            }
         }
 
         $zipPath = Join-Path $artifactDir "UxPlayDesktop-$rid.zip"
@@ -216,9 +208,6 @@ switch ($Action) {
         Write-Host " Packaging complete! Artifacts available at:" -ForegroundColor Green
         if ($isccExe) {
             Write-Host " - Installer: $(Join-Path $artifactDir $setupExeName)" -ForegroundColor White
-            if ($Architecture -eq "x64") {
-                Write-Host " - Installer (Legacy alias): $(Join-Path $artifactDir 'UxPlayDesktop-Setup.exe')" -ForegroundColor White
-            }
         }
         Write-Host " - Portable:  $zipPath" -ForegroundColor White
         Write-Host "==========================================================" -ForegroundColor Green

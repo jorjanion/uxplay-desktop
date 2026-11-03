@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -65,32 +67,22 @@ public class UpdateService : IUpdateService
 
             if (root.TryGetProperty("assets", out var assetsElement) && assetsElement.ValueKind == JsonValueKind.Array)
             {
-                // 1st priority: Native Windows Setup Installer (.exe)
+                var isArm64 = RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ||
+                              RuntimeInformation.OSArchitecture == Architecture.Arm64;
+                var currentArch = isArm64 ? "arm64" : "x64";
+
+                var parsedAssets = new List<(string Name, string Url)>();
                 foreach (var asset in assetsElement.EnumerateArray())
                 {
                     var name = asset.GetProperty("name").GetString();
-                    if (name != null && name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                    var url = asset.GetProperty("browser_download_url").GetString();
+                    if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(url))
                     {
-                        downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? string.Empty;
-                        isInstaller = true;
-                        break;
+                        parsedAssets.Add((name, url));
                     }
                 }
 
-                // 2nd priority: Portable ZIP archive
-                if (string.IsNullOrEmpty(downloadUrl))
-                {
-                    foreach (var asset in assetsElement.EnumerateArray())
-                    {
-                        var name = asset.GetProperty("name").GetString();
-                        if (name != null && name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-                        {
-                            downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? string.Empty;
-                            isInstaller = false;
-                            break;
-                        }
-                    }
-                }
+                (downloadUrl, isInstaller) = SelectBestAsset(parsedAssets, currentArch);
             }
 
             var notes = root.TryGetProperty("body", out var bodyEl) ? bodyEl.GetString() ?? "" : "";
@@ -233,6 +225,53 @@ exit
             LastError = ex.Message;
             return false;
         }
+    }
+
+    public static (string DownloadUrl, bool IsInstaller) SelectBestAsset(
+        IEnumerable<(string Name, string Url)> assets,
+        string targetArch)
+    {
+        var assetList = new List<(string Name, string Url)>(assets);
+
+        // 1st priority: Native Windows Setup Installer (.exe) for target architecture
+        foreach (var (name, url) in assetList)
+        {
+            if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) &&
+                name.Contains(targetArch, StringComparison.OrdinalIgnoreCase))
+            {
+                return (url, true);
+            }
+        }
+
+        // 2nd priority: Any installer (.exe) fallback
+        foreach (var (name, url) in assetList)
+        {
+            if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                return (url, true);
+            }
+        }
+
+        // 3rd priority: Portable ZIP archive for target architecture
+        foreach (var (name, url) in assetList)
+        {
+            if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+                name.Contains(targetArch, StringComparison.OrdinalIgnoreCase))
+            {
+                return (url, false);
+            }
+        }
+
+        // 4th priority: Any portable ZIP fallback
+        foreach (var (name, url) in assetList)
+        {
+            if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                return (url, false);
+            }
+        }
+
+        return (string.Empty, false);
     }
 
     private static bool IsVersionNewer(string latest, string current)
