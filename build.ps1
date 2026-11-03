@@ -127,6 +127,19 @@ switch ($Action) {
             Copy-Item -Path (Join-Path $ProjectRoot "fix_bonjour.bat") -Destination $publishDir -Force
         }
 
+        $nativeCandidates = @(
+            (Join-Path $ProjectRoot "core\build-$Architecture\uxplay.exe"),
+            (Join-Path $ProjectRoot "core\build\uxplay.exe"),
+            (Join-Path $ProjectRoot "core\uxplay.exe")
+        )
+        foreach ($nativeExe in $nativeCandidates) {
+            if (Test-Path $nativeExe) {
+                Write-Host "Bundling native UxPlay core: $nativeExe" -ForegroundColor Green
+                Copy-Item -Path $nativeExe -Destination (Join-Path $publishDir "uxplay.exe") -Force
+                break
+            }
+        }
+
         # Copy runtime dependencies
         $runtimeNative = Join-Path $ProjectRoot "runtimes\$rid\native"
         if (Test-Path $runtimeNative) {
@@ -149,19 +162,6 @@ switch ($Action) {
             $collectScript = Join-Path $ProjectRoot "scripts\collect-runtime-dependencies.ps1"
             if (Test-Path $collectScript) {
                 & $collectScript -StageDir $publishDir -MsysRoot $MsysRoot -EnvironmentName $msysEnv
-            }
-        }
-
-        $nativeCandidates = @(
-            (Join-Path $ProjectRoot "core\build-$Architecture\uxplay.exe"),
-            (Join-Path $ProjectRoot "core\build\uxplay.exe"),
-            (Join-Path $ProjectRoot "core\uxplay.exe")
-        )
-        foreach ($nativeExe in $nativeCandidates) {
-            if (Test-Path $nativeExe) {
-                Write-Host "Bundling native UxPlay core: $nativeExe" -ForegroundColor Green
-                Copy-Item -Path $nativeExe -Destination (Join-Path $publishDir "uxplay.exe") -Force
-                break
             }
         }
 

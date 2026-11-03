@@ -99,7 +99,9 @@ while ($queue.Count -gt 0) {
     foreach ($import in ($imports | Sort-Object -Unique)) {
         $localCandidates = @(
             (Join-Path (Split-Path -Parent $binary) $import),
-            (Join-Path $stage $import)
+            (Join-Path $stage $import),
+            (Join-Path (Split-Path -Parent $binary) "$import.dll"),
+            (Join-Path $stage "$import.dll")
         )
 
         $localDependency = $localCandidates |
@@ -147,7 +149,8 @@ while ($queue.Count -gt 0) {
 
         if (
             $isWindowsDependency -or
-            $import -match "^(api-ms-win-|ext-ms-win-)"
+            $import -match "^(api-ms-win-|ext-ms-win-)" -or
+            $import -match "^(mscordac|mscordbi|mscoree|Microsoft\.DiaSymReader|clr|hostfxr|hostpolicy|coreclr)"
         ) {
             continue
         }
