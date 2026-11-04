@@ -47,6 +47,11 @@ CloseApplications=force
 RestartApplications=no
 CloseApplicationsFilter=*.exe,*.dll
 DisableFinishedPage=yes
+DisableStartupPrompt=yes
+DirExistsWarning=no
+ShowLanguageDialog=auto
+UsePreviousLanguage=yes
+SetupLogging=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -109,6 +114,8 @@ begin
   // Silently terminate any running instances before installation begins
   Exec('taskkill.exe', '/F /IM UxPlayDesktop.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Exec('taskkill.exe', '/F /IM uxplay.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  // Allow Windows and .NET runtime to cleanly release all DLL file locks
+  Sleep(800);
 end;
 
 function InitializeUninstall(): Boolean;

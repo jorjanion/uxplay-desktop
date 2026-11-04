@@ -169,11 +169,11 @@ public class UpdateService : IUpdateService
                 }
                 catch { }
 
-                // Run installer with /CLOSEAPPLICATIONS and /SILENT for automated upgrade
+                // Run installer with robust automated upgrade flags
                 var psi = new ProcessStartInfo
                 {
                     FileName = downloadedFile,
-                    Arguments = "/CLOSEAPPLICATIONS /SILENT",
+                    Arguments = "/VERYSILENT /SUPPRESSMSGBOXES /FORCECLOSEAPPLICATIONS /NORESTART /SP-",
                     UseShellExecute = true,
                     Verb = "runas"
                 };

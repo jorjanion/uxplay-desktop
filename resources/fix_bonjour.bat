@@ -12,10 +12,10 @@ if /i "%~2"=="-silent" set "IS_SILENT=1"
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     if "%IS_SILENT%"=="1" (
-        powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process cmd -ArgumentList '/c `\"%~f0`\" /silent' -Verb RunAs"
+        powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -ArgumentList '/silent' -Verb RunAs"
     ) else (
         echo [INFO] Solicitando permisos de Administrador para configurar el servicio de red Bonjour...
-        powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process cmd -ArgumentList '/c `\"%~f0`\"' -Verb RunAs"
+        powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     )
     exit /b
 )
