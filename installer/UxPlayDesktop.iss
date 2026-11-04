@@ -8,11 +8,11 @@
 #if AppArch == "arm64"
   #define SetupArchAllowed "arm64"
   #define SetupArch64BitMode "arm64"
-  #define OutputName "UxPlayDesktop-arm64-Setup"
+  #define OutputName "UxPlayDesktop-Windows-ARM64-Setup"
 #else
   #define SetupArchAllowed "x64compatible"
   #define SetupArch64BitMode "x64compatible"
-  #define OutputName "UxPlayDesktop-x64-Setup"
+  #define OutputName "UxPlayDesktop-Setup-x64"
 #endif
 
 #define MyAppName "UxPlay Desktop"

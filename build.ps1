@@ -187,7 +187,12 @@ switch ($Action) {
             if (Test-Path $cand) { $isccExe = $cand; break }
         }
 
-        $setupExeName = "UxPlayDesktop-$Architecture-Setup.exe"
+        $setupExeName = if ($Architecture -eq "arm64") {
+            "UxPlayDesktop-Windows-ARM64-Setup.exe"
+        } else {
+            "UxPlayDesktop-Setup-x64.exe"
+        }
+
         if ($isccExe) {
             Write-Host "Compiling native Windows Setup Installer ($Architecture) (Inno Setup)..." -ForegroundColor Yellow
             $issPath = Join-Path $ProjectRoot "installer\UxPlayDesktop.iss"
@@ -196,6 +201,14 @@ switch ($Action) {
                 throw "Inno Setup compilation failed with exit code $LASTEXITCODE"
             }
             Write-Host "Native Setup Installer created successfully: $setupExeName" -ForegroundColor Green
+
+            if ($Architecture -eq "x64") {
+                $archSetup = Join-Path $artifactDir "UxPlayDesktop-Setup-x64.exe"
+                $genericSetup = Join-Path $artifactDir "UxPlayDesktop-Setup.exe"
+                if (Test-Path $archSetup) {
+                    Copy-Item -LiteralPath $archSetup -Destination $genericSetup -Force
+                }
+            }
         }
 
         $zipPath = Join-Path $artifactDir "UxPlayDesktop-$rid.zip"
