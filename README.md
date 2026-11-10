@@ -1,8 +1,12 @@
-# 📺 UxPlay Desktop
+<p align="center">
+  <img src="resources/icon.png" width="96" height="96" alt="UxPlay Desktop Icon" />
+</p>
+
+<h1 align="center">UxPlay Desktop</h1>
 
 <p align="center">
-  <strong>Modern, Ultra-Low-Latency AirPlay Mirroring Client for Windows</strong><br>
-  <em>Turn your Windows PC into a high-performance Apple AirPlay display and audio receiver.</em>
+  <strong>Modern, Ultra-Low-Latency AirPlay Mirroring & Audio Receiver for Windows 10/11</strong><br>
+  <em>Turn your Windows PC into a high-performance Apple AirPlay 60 FPS display receiver. The free, open-source alternative to AirServer & Reflector.</em>
 </p>
 
 <p align="center">
@@ -24,8 +28,19 @@
 ## ⚡ Why UxPlay Desktop?
 
 Many professionals, educators, and users who mirror an iPad or iPhone display for lectures, meetings, and presentations face frustrating issues:
-- **Commercial AirPlay apps** charge expensive recurring subscriptions or show intrusive watermarks.
-- **Older open-source tools** freeze on the first frame with recent iPadOS updates, require cumbersome command-line prompts, suffer from audio desync, or crash due to missing DLLs and D-Bus services.
+- **Commercial AirPlay apps** (AirServer, Reflector) charge expensive recurring subscriptions or show intrusive watermarks.
+- **Older open-source tools** freeze on the first frame with recent iPadOS updates, require cumbersome command-line prompts, suffer from audio desync, or crash due to missing DLLs and Linux D-Bus services.
+
+| Feature | Commercial Tools (AirServer, Reflector) | Legacy CLI Tools | UxPlay Desktop |
+| :--- | :--- | :--- | :--- |
+| **Cost & License** | ❌ Paid (\$20–\$40 / subscriptions) | ✅ Free Open Source | ✅ **100% Free & Open Source (€0)** |
+| **Setup Experience** | ✅ Simple installer | ❌ Build from source / missing DLLs | ✅ **1-Click Self-Contained Installer (.exe)** |
+| **Hardware Decoding** | ⚠️ Software or basic Direct3D | ⚠️ Linux-oriented (D-Bus crashes) | ✅ **Direct3D 11/12 GPU Acceleration (60 FPS)** |
+| **Apple Bonjour Healing** | ❌ Manual troubleshooting | ❌ None | ✅ **Automated Discovery & Firewall Healing** |
+| **User Interface** | ✅ Basic GUI | ❌ Terminal only | ✅ **Modern WPF Fluent UI + Streaming Presets** |
+| **Multilingual** | ⚠️ English only | ⚠️ English only | ✅ **15+ Native Translations Included** |
+
+---
 
 **UxPlay Desktop** is built from the ground up to solve these problems permanently:
 - **📦 1-Click Native Installer (`.exe`):** No dealing with zip files or manual extraction. Installs everything needed automatically.
