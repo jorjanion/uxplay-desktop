@@ -79,10 +79,20 @@ public class LogParser : ILogParser
             result.NewState = ServerState.Listening;
         }
         else if (trimmed.Contains("Stopping RAOP Server", StringComparison.OrdinalIgnoreCase) ||
-                 trimmed.Contains("video_reset: type = RTP_Shutdown", StringComparison.OrdinalIgnoreCase) ||
-                 trimmed.Contains("TEARDOWN request", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("video_reset", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("TEARDOWN", StringComparison.OrdinalIgnoreCase) ||
                  trimmed.Contains("lost connection with client", StringComparison.OrdinalIgnoreCase) ||
-                 trimmed.Contains("tcp socket was closed by client", StringComparison.OrdinalIgnoreCase))
+                 trimmed.Contains("tcp socket was closed by client", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("running is no longer true", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("Connection closed on socket", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("Disconnecting on software request", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("client HTTP request POST stop", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("Destroying connection", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("video stream is stopping", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("End-Of-Stream (video)", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("Output window was closed", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("video_renderer_stop", StringComparison.OrdinalIgnoreCase) ||
+                 trimmed.Contains("renderer destroyed", StringComparison.OrdinalIgnoreCase))
         {
             result.NewState = ServerState.Listening;
             result.ClientDisconnected = true;

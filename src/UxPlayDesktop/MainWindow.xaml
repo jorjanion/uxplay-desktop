@@ -362,7 +362,7 @@
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Loc[StreamTime]}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
                                                 <TextBlock Text="{Binding FormattedDuration}" FontSize="15" FontWeight="Bold" Foreground="White" Margin="0,4,0,0" />
-                                                <TextBlock Text="{Binding Loc[LiveSession]}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                                                <TextBlock Text="{Binding SessionActiveText}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                                             </StackPanel>
                                         </Border>
                                     </Grid>

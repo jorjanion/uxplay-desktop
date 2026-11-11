@@ -54,6 +54,7 @@ public class MainViewModel : ViewModelBase
         {
             if (SetField(ref _serverState, value))
             {
+                UpdateDuration();
                 OnPropertyChanged(nameof(StatusTitle));
                 OnPropertyChanged(nameof(StatusSubtitle));
                 OnPropertyChanged(nameof(StatusDescription));
@@ -63,6 +64,7 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(StartStopButtonIcon));
                 OnPropertyChanged(nameof(DisplayClientName));
                 OnPropertyChanged(nameof(DisplayClientIp));
+                OnPropertyChanged(nameof(SessionActiveText));
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -148,10 +150,11 @@ public class MainViewModel : ViewModelBase
 
     public string DisplayClientName => string.IsNullOrWhiteSpace(Session.ClientName) ? Loc["NoDevice"] : Session.ClientName;
     public string DisplayClientIp => string.IsNullOrWhiteSpace(Session.ClientIpAddress) ? Loc["WaitingConnection"] : Session.ClientIpAddress;
+    public string SessionActiveText => ServerState == ServerState.Streaming ? Loc["LiveSession"] : Loc["WaitingConnection"];
     public string DisplayTargetFps => string.Format(Loc["TargetFpsFormat"], Settings.TargetFps);
     public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
     public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
-    public string AppVersionDisplay => "UxPlay Desktop v1.2.0";
+    public string AppVersionDisplay => "UxPlay Desktop v1.2.1";
     public string LocalNetworkInfo => GetLocalNetworkInfo();
 
     public bool StartOnBoot
@@ -540,6 +543,7 @@ public class MainViewModel : ViewModelBase
             OnPropertyChanged(nameof(RecordButtonText));
             OnPropertyChanged(nameof(VolumeDisplay));
             OnPropertyChanged(nameof(MuteButtonText));
+            OnPropertyChanged(nameof(SessionActiveText));
         };
 
         _processManager.StateChanged += state => RunOnUi(() => ServerState = state);
@@ -723,12 +727,14 @@ public class MainViewModel : ViewModelBase
 
     private void OnSessionUpdated()
     {
+        UpdateDuration();
         OnPropertyChanged(nameof(Session));
         OnPropertyChanged(nameof(StatusTitle));
         OnPropertyChanged(nameof(StatusSubtitle));
         OnPropertyChanged(nameof(StatusDescription));
         OnPropertyChanged(nameof(DisplayClientName));
         OnPropertyChanged(nameof(DisplayClientIp));
+        OnPropertyChanged(nameof(SessionActiveText));
     }
 
     private void UpdateDuration()

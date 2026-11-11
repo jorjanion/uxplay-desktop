@@ -412,6 +412,12 @@ public class CoreProcessManager : ICoreProcessManager, IDisposable
         CurrentSession.ConnectedAt = null;
         CurrentSession.CurrentFps = 0;
         CurrentSession.ActivePinCode = null;
+        CurrentSession.ActiveResolution = "1920x1080";
+        CurrentSession.ActiveCodec = "H.264";
+        if (IsRunning && CurrentSession.State != ServerState.Listening)
+        {
+            SetState(ServerState.Listening);
+        }
     }
 
     private static void ConfigureEnvironmentVariables(ProcessStartInfo startInfo)

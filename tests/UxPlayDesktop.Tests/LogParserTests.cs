@@ -119,6 +119,46 @@ public class LogParserTests
     }
 
     [Fact]
+    public void ParseLine_MirrorRunningNoLongerTrue_SetsDisconnectedFlag()
+    {
+        var line = "raop_rtp_mirror->running is no longer true";
+        var result = _parser.ParseLine(line);
+
+        Assert.True(result.ClientDisconnected);
+        Assert.Equal(ServerState.Listening, result.NewState);
+    }
+
+    [Fact]
+    public void ParseLine_ConnectionClosedOnSocket_SetsDisconnectedFlag()
+    {
+        var line = "Connection closed on socket 10396";
+        var result = _parser.ParseLine(line);
+
+        Assert.True(result.ClientDisconnected);
+        Assert.Equal(ServerState.Listening, result.NewState);
+    }
+
+    [Fact]
+    public void ParseLine_OutputWindowClosed_SetsDisconnectedFlag()
+    {
+        var line = "GStreamer error (video): Output window was closed";
+        var result = _parser.ParseLine(line);
+
+        Assert.True(result.ClientDisconnected);
+        Assert.Equal(ServerState.Listening, result.NewState);
+    }
+
+    [Fact]
+    public void ParseLine_ClientPostStop_SetsDisconnectedFlag()
+    {
+        var line = "client HTTP request POST stop";
+        var result = _parser.ParseLine(line);
+
+        Assert.True(result.ClientDisconnected);
+        Assert.Equal(ServerState.Listening, result.NewState);
+    }
+
+    [Fact]
     public void ParseLine_ErrorLevel_DetectsError()
     {
         var line = "*** ERROR: Failed to bind to socket port 7000";
