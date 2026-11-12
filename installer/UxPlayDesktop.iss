@@ -16,7 +16,7 @@
 #endif
 
 #define MyAppName "UxPlay Desktop"
-#define MyAppVersion "1.2.2"
+#define MyAppVersion "1.2.3"
 #define MyAppPublisher "jorjanion"
 #define MyAppURL "https://github.com/jorjanion/uxplay-desktop"
 #define MyAppExeName "UxPlayDesktop.exe"
