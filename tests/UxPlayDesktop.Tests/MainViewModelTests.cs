@@ -165,6 +165,40 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public void MainViewModel_PresetOption_UpdatesDynamicallyOnLanguageChange()
+    {
+        var vm = new MainViewModel(_settingsService, _processManager, _bonjourService, _autostartService);
+        vm.SelectedLanguage = vm.Loc.SupportedLanguages.First(l => l.Code == "es");
+        vm.SelectedPreset = PerformancePreset.TeachingAndPresentation;
+
+        Assert.Contains("Clases y Presentaciones", vm.SelectedPresetOption.DisplayName);
+        Assert.Contains("120-150 ms", vm.SelectedPresetOption.DisplayName);
+
+        // Switch to English
+        vm.SelectedLanguage = vm.Loc.SupportedLanguages.First(l => l.Code == "en");
+
+        Assert.Contains("Teaching & Presentations", vm.SelectedPresetOption.DisplayName);
+        Assert.Contains("120-150 ms", vm.SelectedPresetOption.DisplayName);
+        Assert.Contains("120-150 ms", vm.SelectedPresetOption.ExpectedDelay);
+    }
+
+    [Fact]
+    public void MainViewModel_SelectedPresetOption_BidirectionalSync()
+    {
+        var vm = new MainViewModel(_settingsService, _processManager, _bonjourService, _autostartService);
+        
+        var gamingOption = vm.PresetOptions.First(p => p.Preset == PerformancePreset.LowLatencyGaming);
+        vm.SelectedPresetOption = gamingOption;
+
+        Assert.Equal(PerformancePreset.LowLatencyGaming, vm.SelectedPreset);
+        Assert.Equal(PerformancePreset.LowLatencyGaming, vm.Settings.Preset);
+
+        vm.SelectedPreset = PerformancePreset.HighQualityCinema;
+        Assert.Equal(PerformancePreset.HighQualityCinema, vm.SelectedPresetOption.Preset);
+        Assert.Contains("500-1000 ms", vm.SelectedPresetOption.ExpectedDelay);
+    }
+
+    [Fact]
     public void MainViewModel_LogReceived_AddsToLogsViewModel()
     {
         _settingsService.CurrentSettings.AutoStartServer = false;

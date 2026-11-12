@@ -391,10 +391,16 @@
                                             <!-- Right: Quick folder open & screenshot -->
                                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Button Command="{Binding CaptureScreenshotCommand}" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5" Margin="0,0,6,0">
-                                                    <TextBlock Text="📸 Captura" FontSize="11" FontWeight="SemiBold" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="📸 " FontSize="11" />
+                                                        <TextBlock Text="{Binding Loc[ScreenshotButton]}" FontSize="11" FontWeight="SemiBold" />
+                                                    </StackPanel>
                                                 </Button>
                                                 <Button Command="{Binding OpenRecordingsFolderCommand}" Style="{StaticResource SecondaryButtonStyle}" Padding="10,5">
-                                                    <TextBlock Text="📂 Grabaciones" FontSize="11" FontWeight="SemiBold" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="📂 " FontSize="11" />
+                                                        <TextBlock Text="{Binding Loc[OpenRecordings]}" FontSize="11" FontWeight="SemiBold" />
+                                                    </StackPanel>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -408,12 +414,12 @@
                                     <TextBlock Text="{Binding Loc[PresetTitle]}" FontSize="15" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,6" />
                                     <TextBlock Text="{Binding Loc[PresetSubtitle]}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,12" />
 
-                                    <ComboBox ItemsSource="{Binding AvailablePresets}"
-                                              SelectedItem="{Binding SelectedPreset}"
+                                    <ComboBox ItemsSource="{Binding PresetOptions}"
+                                              SelectedItem="{Binding SelectedPresetOption}"
                                               Margin="0,0,0,10">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Converter={x:Static models:PresetDisplayConverter.Instance}}" Foreground="White" />
+                                                <TextBlock Text="{Binding DisplayName}" Foreground="White" />
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
@@ -565,10 +571,16 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
                                         <Button Grid.Column="0" Command="{Binding OpenRecordingsFolderCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,8,0">
-                                            <TextBlock Text="📂 Carpeta de Grabaciones" />
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="📂 " />
+                                                <TextBlock Text="{Binding Loc[OpenRecordings]}" />
+                                            </StackPanel>
                                         </Button>
                                         <Button Grid.Column="1" Command="{Binding CaptureScreenshotCommand}" Style="{StaticResource SecondaryButtonStyle}">
-                                            <TextBlock Text="📸 Tomar Captura de Pantalla" />
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="📸 " />
+                                                <TextBlock Text="{Binding Loc[ScreenshotButton]}" />
+                                            </StackPanel>
                                         </Button>
                                     </Grid>
                                 </StackPanel>
@@ -917,7 +929,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="{Binding Loc[DiagnosticTitle]}" FontSize="16" FontWeight="Bold" Foreground="White" />
-                            <TextBlock Text="Inspección automática de mDNS, adaptadores y puertos AirPlay" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0" />
+                            <TextBlock Text="{Binding Loc[DiagnosticSubtitle]}" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0" />
                         </StackPanel>
                         <Button Grid.Column="1" Command="{Binding CloseDiagnosticCommand}" Style="{StaticResource SecondaryButtonStyle}" Padding="8,4" Content="✕" />
                     </Grid>

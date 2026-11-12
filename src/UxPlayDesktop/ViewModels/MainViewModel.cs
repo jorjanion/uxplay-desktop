@@ -91,12 +91,21 @@ public class MainViewModel : ViewModelBase
             {
                 Settings.Language = value.Code;
                 Loc.SetLanguage(value.Code);
+                if (PresetOptions != null)
+                {
+                    foreach (var opt in PresetOptions)
+                    {
+                        opt.Refresh();
+                    }
+                }
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(StatusTitle));
                 OnPropertyChanged(nameof(StatusSubtitle));
                 OnPropertyChanged(nameof(StatusDescription));
                 OnPropertyChanged(nameof(StartStopButtonText));
                 OnPropertyChanged(nameof(PresetDescription));
+                OnPropertyChanged(nameof(SelectedPresetOption));
+                OnPropertyChanged(nameof(SelectedPreset));
                 OnPropertyChanged(nameof(DisplayClientName));
                 OnPropertyChanged(nameof(DisplayClientIp));
                 OnPropertyChanged(nameof(DisplayTargetFps));
@@ -154,7 +163,7 @@ public class MainViewModel : ViewModelBase
     public string DisplayTargetFps => string.Format(Loc["TargetFpsFormat"], Settings.TargetFps);
     public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
     public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
-    public string AppVersionDisplay => "UxPlay Desktop v1.2.1";
+    public string AppVersionDisplay => "UxPlay Desktop v1.2.2";
     public string LocalNetworkInfo => GetLocalNetworkInfo();
 
     public bool StartOnBoot
@@ -433,6 +442,21 @@ public class MainViewModel : ViewModelBase
         private set => SetField(ref _bonjourStatusText, value);
     }
 
+    private PresetOption _selectedPresetOption = null!;
+    public PresetOption SelectedPresetOption
+    {
+        get => _selectedPresetOption;
+        set
+        {
+            if (value != null && !ReferenceEquals(_selectedPresetOption, value))
+            {
+                _selectedPresetOption = value;
+                OnPropertyChanged();
+                SelectedPreset = value.Preset;
+            }
+        }
+    }
+
     public PerformancePreset SelectedPreset
     {
         get => Settings.Preset;
@@ -445,10 +469,21 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(PresetDescription));
                 _settingsService.Save(Settings);
             }
+            if (_selectedPresetOption == null || _selectedPresetOption.Preset != value)
+            {
+                var match = PresetOptions?.FirstOrDefault(p => p.Preset == value);
+                if (match != null)
+                {
+                    _selectedPresetOption = match;
+                    OnPropertyChanged(nameof(SelectedPresetOption));
+                }
+            }
         }
     }
 
     public string PresetDescription => Settings.Preset.GetDescription();
+
+    public IReadOnlyList<PresetOption> PresetOptions { get; }
 
     public IReadOnlyList<PerformancePreset> AvailablePresets { get; } =
     [
@@ -520,6 +555,16 @@ public class MainViewModel : ViewModelBase
         _hotkeyService = hotkeyService ?? new GlobalHotkeyService();
 
         _settings = _settingsService.CurrentSettings;
+        PresetOptions =
+        [
+            new PresetOption(PerformancePreset.TeachingAndPresentation),
+            new PresetOption(PerformancePreset.LowLatencyGaming),
+            new PresetOption(PerformancePreset.HighQualityCinema),
+            new PresetOption(PerformancePreset.AudioOnly),
+            new PresetOption(PerformancePreset.Custom)
+        ];
+        _selectedPresetOption = PresetOptions.FirstOrDefault(p => p.Preset == _settings.Preset) ?? PresetOptions[0];
+
         Logs = new LogsViewModel();
         Logs.AddEntry(new LogEntry { Level = LogLevel.Info, Message = "UxPlay Desktop inicializado. Esperando inicio de sesión o conexiones AirPlay..." });
 
@@ -529,11 +574,17 @@ public class MainViewModel : ViewModelBase
         Loc.SetLanguage(_settings.Language);
         Loc.PropertyChanged += (_, _) =>
         {
+            foreach (var opt in PresetOptions)
+            {
+                opt.Refresh();
+            }
             OnPropertyChanged(nameof(StatusTitle));
             OnPropertyChanged(nameof(StatusSubtitle));
             OnPropertyChanged(nameof(StatusDescription));
             OnPropertyChanged(nameof(StartStopButtonText));
             OnPropertyChanged(nameof(PresetDescription));
+            OnPropertyChanged(nameof(SelectedPresetOption));
+            OnPropertyChanged(nameof(SelectedPreset));
             OnPropertyChanged(nameof(DisplayClientName));
             OnPropertyChanged(nameof(DisplayClientIp));
             OnPropertyChanged(nameof(DisplayTargetFps));
