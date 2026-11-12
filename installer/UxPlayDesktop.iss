@@ -111,9 +111,9 @@ var
   ResultCode: Integer;
 begin
   Result := True;
-  // Silently terminate any running instances before installation begins
-  Exec('taskkill.exe', '/F /IM UxPlayDesktop.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  Exec('taskkill.exe', '/F /IM uxplay.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  // Silently terminate running instances (WITHOUT /T to prevent killing the installer if spawned as a child from the running app)
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM UxPlayDesktop.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM uxplay.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   // Allow Windows and .NET runtime to cleanly release all DLL file locks
   Sleep(800);
 end;
@@ -123,8 +123,8 @@ var
   ResultCode: Integer;
 begin
   Result := True;
-  // Silently terminate running instances before uninstallation
-  Exec('taskkill.exe', '/F /IM UxPlayDesktop.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  Exec('taskkill.exe', '/F /IM uxplay.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  // Silently terminate running instances before uninstallation (WITHOUT /T)
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM UxPlayDesktop.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM uxplay.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 

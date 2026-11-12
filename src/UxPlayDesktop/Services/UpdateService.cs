@@ -169,11 +169,11 @@ public class UpdateService : IUpdateService
                 }
                 catch { }
 
-                // Run installer with robust automated upgrade flags
+                // Run installer with robust automated upgrade flags (/SILENT shows progress bar while suppressing questions)
                 var psi = new ProcessStartInfo
                 {
                     FileName = downloadedFile,
-                    Arguments = "/VERYSILENT /SUPPRESSMSGBOXES /FORCECLOSEAPPLICATIONS /NORESTART /SP-",
+                    Arguments = "/SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS /NORESTART /SP-",
                     UseShellExecute = true,
                     Verb = "runas"
                 };
