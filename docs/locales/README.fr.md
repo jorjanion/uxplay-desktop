@@ -1,4 +1,14 @@
-﻿# ðŸ“º UxPlay Desktop (FranÃ§ais)
+﻿</p>
+
+<p align="center">
+  <img src="../screenshots/dashboard.png" width="95%" alt="UxPlay Desktop Dashboard" />
+</p>
+
+<p align="center">
+  <img src="../screenshots/mirroring_demo.jpg" width="95%" alt="UxPlay Direct3D 11 AirPlay Mirroring" />
+</p>
+
+--- ðŸ“º UxPlay Desktop (FranÃ§ais)
 
 <p align="center">
   <strong>Client de recopie d'Ã©cran AirPlay moderne et Ã  ultra-faible latence pour Windows</strong><br>

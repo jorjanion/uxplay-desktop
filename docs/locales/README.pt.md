@@ -1,4 +1,14 @@
-﻿# ðŸ“º UxPlay Desktop (PortuguÃªs - Brasil)
+﻿</p>
+
+<p align="center">
+  <img src="../screenshots/dashboard.png" width="95%" alt="UxPlay Desktop Dashboard" />
+</p>
+
+<p align="center">
+  <img src="../screenshots/mirroring_demo.jpg" width="95%" alt="UxPlay Direct3D 11 AirPlay Mirroring" />
+</p>
+
+--- ðŸ“º UxPlay Desktop (PortuguÃªs - Brasil)
 
 <p align="center">
   <strong>Cliente de espelhamento de tela AirPlay moderno e de ultra-baixa latÃªncia para Windows</strong><br>

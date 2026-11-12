@@ -18,6 +18,14 @@
   <img src="https://img.shields.io/badge/Cost-%E2%82%AC0%20Free%20%26%20Open%20Source-brightgreen" alt="Cost">
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" width="95%" alt="UxPlay Desktop Dashboard" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/mirroring_demo.jpg" width="95%" alt="UxPlay Direct3D 11 AirPlay Mirroring" />
+</p>
+
 ---
 
 ### 🌐 Read this documentation in your language:

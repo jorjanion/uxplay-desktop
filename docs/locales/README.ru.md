@@ -1,4 +1,14 @@
-﻿# ðŸ“º UxPlay Desktop (Ð ÑƒÑÑÐºÐ¸Ð¹)
+﻿</p>
+
+<p align="center">
+  <img src="../screenshots/dashboard.png" width="95%" alt="UxPlay Desktop Dashboard" />
+</p>
+
+<p align="center">
+  <img src="../screenshots/mirroring_demo.jpg" width="95%" alt="UxPlay Direct3D 11 AirPlay Mirroring" />
+</p>
+
+--- ðŸ“º UxPlay Desktop (Ð ÑƒÑÑÐºÐ¸Ð¹)
 
 <p align="center">
   <strong>Ð¡Ð¾Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ñ‹Ð¹ ÐºÐ»Ð¸ÐµÐ½Ñ‚ Ð´ÑƒÐ±Ð»Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ ÑÐºÑ€Ð°Ð½Ð° AirPlay Ð´Ð»Ñ Windows Ñ ÑƒÐ»ÑŒÑ‚Ñ€Ð°Ð½Ð¸Ð·ÐºÐ¾Ð¹ Ð·Ð°Ð´ÐµÑ€Ð¶ÐºÐ¾Ð¹</strong><br>

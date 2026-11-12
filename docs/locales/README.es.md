@@ -14,6 +14,14 @@
   <img src="https://img.shields.io/badge/Coste-0%20%E2%82%AC%20Libre%20y%20Gratuito-brightgreen" alt="Cost">
 </p>
 
+<p align="center">
+  <img src="../screenshots/dashboard.png" width="95%" alt="Panel Principal de UxPlay Desktop" />
+</p>
+
+<p align="center">
+  <img src="../screenshots/mirroring_demo.jpg" width="95%" alt="Duplicado de Pantalla AirPlay Direct3D 11" />
+</p>
+
 ---
 
 ### ðŸŒ Leer esta documentaciÃ³n en otros idiomas:
