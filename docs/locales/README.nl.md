@@ -1,14 +1,4 @@
-﻿</p>
-
-<p align="center">
-  <img src="../screenshots/dashboard.png" width="95%" alt="UxPlay Desktop Dashboard" />
-</p>
-
-<p align="center">
-  <img src="../screenshots/mirroring_demo.jpg" width="95%" alt="UxPlay Direct3D 11 AirPlay Mirroring" />
-</p>
-
---- ðŸ“º UxPlay Desktop (Nederlands)
+# 📺 UxPlay Desktop (Nederlands)
 
 <p align="center">
   <strong>Moderne AirPlay-schermspiegeling met ultralage latentie voor Windows</strong><br>
@@ -24,32 +14,40 @@
   <img src="https://img.shields.io/badge/Kosten-0%20%E2%82%AC%20Gratis%20%26%20Open%20Source-brightgreen" alt="Cost">
 </p>
 
+<p align="center">
+  <img src="../screenshots/dashboard.png" width="95%" alt="UxPlay Desktop Dashboard" />
+</p>
+
+<p align="center">
+  <img src="../screenshots/mirroring_demo.jpg" width="95%" alt="UxPlay Direct3D 11 AirPlay Mirroring" />
+</p>
+
 ---
 
-### ðŸŒ Lees deze documentatie in andere talen:
-[ðŸ‡ªðŸ‡¸ EspaÃ±ol](README.es.md) â€¢ [ðŸ‡ºðŸ‡¸ English](../../README.md) â€¢ [ðŸ‡«ðŸ‡· FranÃ§ais](README.fr.md) â€¢ [ðŸ‡©ðŸ‡ª Deutsch](README.de.md) â€¢ [ðŸ‡®ðŸ‡¹ Italiano](README.it.md) â€¢ [ðŸ‡§ðŸ‡· PortuguÃªs (Brasil)](README.pt.md) â€¢ [ðŸ‡·ðŸ‡º Ð ÑƒÑÑÐºÐ¸Ð¹](README.ru.md) â€¢ [ðŸ‡µðŸ‡± Polski](README.pl.md) â€¢ [ðŸ‡³ðŸ‡± Nederlands](README.nl.md) â€¢ [ðŸ‡ºðŸ‡¦ Ð£ÐºÑ€Ð°Ñ—Ð½ÑÑŒÐºÐ°](README.uk.md) â€¢ [ðŸ‡¨ðŸ‡³ ç®€ä½“ä¸­æ–‡](README.zh-CN.md) â€¢ [ðŸ‡¯ðŸ‡µ æ—¥æœ¬èªž](README.ja.md)
+### 🌐 Lees deze documentatie in andere talen:
+[🇪🇸 Español](README.es.md) • [🇺🇸 English](../../README.md) • [🇫🇷 Français](README.fr.md) • [🇩🇪 Deutsch](README.de.md) • [🇮🇹 Italiano](README.it.md) • [🇧🇷 Português (Brasil)](README.pt.md) • [🇷🇺 Русский](README.ru.md) • [🇵🇱 Polski](README.pl.md) • [🇳🇱 Nederlands](README.nl.md) • [🇺🇦 Українська](README.uk.md) • [🇨🇳 简体中文](README.zh-CN.md) • [🇯🇵 日本語](README.ja.md)
 
 ---
 
-## âš¡ Waarom UxPlay Desktop?
+## ⚡ Waarom UxPlay Desktop?
 
 Docenten, sprekers en professionals die hun iPad- of iPhone-scherm delen op een pc lopen vaak tegen frustraties aan:
-- **CommerciÃ«le AirPlay-software** vereist dure abonnementen of toont storende watermerken.
+- **Commerciële AirPlay-software** vereist dure abonnementen of toont storende watermerken.
 - **Oudere open-source tools** lopen vast bij recente iPadOS-versies, vereisen ingewikkelde consolecommando's of kampen met audio-vertraging.
 
 **UxPlay Desktop** is ontworpen om dit voorgoed op te lossen:
 
-- **ðŸ“¦ Direct installatiebestand (`.exe`):** Geen gedoe met zip-bestanden. Dubbelklik op het installatieprogramma en alles staat klaar.
-- **ðŸš€ 100% Zelfvoorzienend (Self-Contained):** Geen externe .NET-downloads vereist; .NET 8 runtime, C++ bibliotheken en GStreamer zijn ingebouwd.
-- **âš¡ Direct3D 11/12 Hardwareversnelling:** Vloeiende 60 FPS weergave, haarscherpe notities en minimale invoervertraging.
-- **ðŸ–¼ï¸ Randloze Venstermodus:** Strakke weergave geoptimaliseerd voor presentaties en schermdeling.
-- **ðŸ›¡ï¸ Automatisch Bonjour- & Firewall-herstel:** Herstelt beschadigde mDNS-services en configureert de Windows Firewall automatisch.
-- **ðŸŒ Beschikbaar in 15+ talen:** Nederlands, Engels, Spaans, Frans, Duits, Portugees, Russisch, Chinees, Japans en meer.
-- **ðŸ”„ 1-Klik Updates:** Detecteert automatisch nieuwe GitHub-releases en werkt zichzelf soepel bij.
+- **📦 Direct installatiebestand (`.exe`):** Geen gedoe met zip-bestanden. Dubbelklik op het installatieprogramma en alles staat klaar.
+- **🚀 100% Zelfvoorzienend (Self-Contained):** Geen externe .NET-downloads vereist; .NET 8 runtime, C++ bibliotheken en GStreamer zijn ingebouwd.
+- **⚡ Direct3D 11/12 Hardwareversnelling:** Vloeiende 60 FPS weergave, haarscherpe notities en minimale invoervertraging.
+- **🖼️ Randloze Venstermodus:** Strakke weergave geoptimaliseerd voor presentaties en schermdeling.
+- **🛡️ Automatisch Bonjour- & Firewall-herstel:** Herstelt beschadigde mDNS-services en configureert de Windows Firewall automatisch.
+- **🌍 Beschikbaar in 15+ talen:** Nederlands, Engels, Spaans, Frans, Duits, Portugees, Russisch, Chinees, Japans en meer.
+- **🔄 1-Klik Updates:** Detecteert automatisch nieuwe GitHub-releases en werkt zichzelf soepel bij.
 
 ---
 
-## ðŸ“– Snelstartgids (3 Eenvoudige Stappen)
+## 📖 Snelstartgids (3 Eenvoudige Stappen)
 
 ### Stap 1: Het programma installeren
 1. Download het installatiebestand **[`UxPlayDesktop-Setup.exe`](https://github.com/jorjanion/uxplay-desktop/releases/latest)**.
@@ -71,14 +69,14 @@ Docenten, sprekers en professionals die hun iPad- of iPhone-scherm delen op een 
 ### Streamingprofielen en prestaties
 | Profiel | Aanbevolen voor | Wat doet het? |
 | :--- | :--- | :--- |
-| **ðŸŽ“ Onderwijs & Presentaties** *(Standaard)* | Colleges, dia's, digitale schoolborden | Maximale tekstscherpte, Direct3D en automatische slaapstandblokkering. |
-| **ðŸŽ® Lage Latentie & Gamen** | Tekenen met stylus, mobiele games | Minimale buffer voor onmiddellijke reactietijd bij 60 FPS. |
-| **ðŸŽ¬ Film & HD-Video** | Films, YouTube, videoweergave | Adaptieve buffer tegen haperingen en beeldvervorming. |
-| **ðŸŽµ Alleen Audio** | Muziek, podcasts, Apple Music | Schakelt video uit om bronnen te sparen en streamt lossless ALAC-audio. |
+| **🎓 Onderwijs & Presentaties** *(Standaard)* | Colleges, dia's, digitale schoolborden | Maximale tekstscherpte, Direct3D en automatische slaapstandblokkering. |
+| **🎮 Lage Latentie & Gamen** | Tekenen met stylus, mobiele games | Minimale buffer voor onmiddellijke reactietijd bij 60 FPS. |
+| **🎬 Film & HD-Video** | Films, YouTube, videoweergave | Adaptieve buffer tegen haperingen en beeldvervorming. |
+| **🎵 Alleen Audio** | Muziek, podcasts, Apple Music | Schakelt video uit om bronnen te sparen en streamt lossless ALAC-audio. |
 
 ---
 
-## ðŸ› ï¸ Veelgestelde Vragen & Probleemoplossing
+## 🛠️ Veelgestelde Vragen & Probleemoplossing
 
 - **Ziet u "UxPlay Windows" niet in Synchrone Weergave?**
   1. Controleer of beide apparaten op hetzelfde wifi-netwerk zitten (let op gastnetwerken met client-isolatie).
@@ -88,9 +86,9 @@ Docenten, sprekers en professionals die hun iPad- of iPhone-scherm delen op een 
 
 ---
 
-## ðŸ”¬ Technische Architectuur & Werking
+## 🔬 Technische Architectuur & Werking
 
-Voor ontwikkelaars en geÃ¯nteresseerden in de technische werking:
+Voor ontwikkelaars en geïnteresseerden in de technische werking:
 
 ```mermaid
 graph TD
@@ -122,7 +120,7 @@ graph TD
 
 ### 3. Procesveiligheid via Windows Job Objects
 * Native processen zijn gekoppeld aan een Win32 **Job Object** met `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`.
-* Als de interface sluit, beÃ«indigt Windows automatisch alle onderliggende processen.
+* Als de interface sluit, beëindigt Windows automatisch alle onderliggende processen.
 
 ### 4. Apple Bonjour Zelfherstel
 * Directe communicatie met `dnssd.dll`.
@@ -130,7 +128,7 @@ graph TD
 
 ---
 
-## ðŸ› Foutmeldingen & Issues
+## 🐛 Foutmeldingen & Issues
 
 Heeft u een fout ontdekt? Uw melding helpt ons project te verbeteren!
 
@@ -142,21 +140,20 @@ Open een issue op **[GitHub Issues](https://github.com/jorjanion/uxplay-desktop/
 
 ---
 
-## ðŸ¤ Bijdragen & Pull Requests (PR)
+## 🤝 Bijdragen & Pull Requests (PR)
 
 Bijdragen zijn **van harte welkom**!
 
 Uitgangspunten:
 1. **Toegevoegde Waarde:** PR's moeten merkbare verbeteringen leveren (prestaties, stabiliteit, toegankelijkheid).
-2. **Kostenloos (â‚¬0):** Strikt 100% Free & Open Source. Geen betaalde SDK's of propriÃ«taire onderdelen.
+2. **Kostenloos (€0):** Strikt 100% Free & Open Source. Geen betaalde SDK's of propriëtaire onderdelen.
 3. **Duidelijkheid:** Licht wijzigingen duidelijk toe in de beschrijving van de PR.
 4. **Testdekking:** Alle 39 unittests in `tests/UxPlayDesktop.Tests` moeten slagen.
 
 ---
 
-## ðŸ“œ Licentie & Erkenningen
+## 📜 Licentie & Erkenningen
 
 * **UxPlay Desktop** is gepubliceerd onder de **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)**.
 * Gebouwd op het werk van **[FDH2/UxPlay](https://github.com/FDH2/UxPlay)**.
-* Ontwikkeld en onderhouden met â¤ï¸ door **jorjanion**.
-
+* Ontwikkeld en onderhouden met ❤️ door **jorjanion**.
