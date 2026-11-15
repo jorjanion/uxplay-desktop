@@ -39,14 +39,14 @@ Many professionals, educators, and users who mirror an iPad or iPhone display fo
 - **Commercial AirPlay apps** (AirServer, Reflector) charge expensive recurring subscriptions or show intrusive watermarks.
 - **Older open-source tools** freeze on the first frame with recent iPadOS updates, require cumbersome command-line prompts, suffer from audio desync, or crash due to missing DLLs and Linux D-Bus services.
 
-| Feature | Commercial Tools (AirServer, Reflector) | Legacy CLI Tools | UxPlay Desktop |
+| Feature | UxPlay Desktop | Commercial Tools (AirServer, Reflector) | Legacy CLI Tools |
 | :--- | :--- | :--- | :--- |
-| **Cost & License** | ❌ Paid (\$20–\$40 / subscriptions) | ✅ Free Open Source | ✅ **100% Free & Open Source (€0)** |
-| **Setup Experience** | ✅ Simple installer | ❌ Build from source / missing DLLs | ✅ **1-Click Self-Contained Installer (.exe)** |
-| **Hardware Decoding** | ⚠️ Software or basic Direct3D | ⚠️ Linux-oriented (D-Bus crashes) | ✅ **Direct3D 11/12 GPU Acceleration (60 FPS)** |
-| **Apple Bonjour Healing** | ❌ Manual troubleshooting | ❌ None | ✅ **Automated Discovery & Firewall Healing** |
-| **User Interface** | ✅ Basic GUI | ❌ Terminal only | ✅ **Modern WPF Fluent UI + Streaming Presets** |
-| **Multilingual** | ⚠️ English only | ⚠️ English only | ✅ **15+ Native Translations Included** |
+| **Cost & License** | ✅ **100% Free & Open Source (€0)** | ❌ Paid (\$20–\$40 / subscriptions) | ✅ Free Open Source |
+| **Setup Experience** | ✅ **1-Click Self-Contained Installer (.exe)** | ✅ Simple installer | ❌ Build from source / missing DLLs |
+| **Hardware Decoding** | ✅ **Direct3D 11/12 GPU Acceleration (60 FPS)** | ⚠️ Software or basic Direct3D | ⚠️ Linux-oriented (D-Bus crashes) |
+| **Apple Bonjour Healing** | ✅ **Automated Discovery & Firewall Healing** | ❌ Manual troubleshooting | ❌ None |
+| **User Interface** | ✅ **Modern WPF Fluent UI + Streaming Presets** | ✅ Basic GUI | ❌ Terminal only |
+| **Multilingual** | ✅ **15+ Native Translations Included** | ⚠️ English only | ⚠️ English only |
 
 ---
 
