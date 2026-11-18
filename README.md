@@ -65,6 +65,13 @@ Many professionals, educators, and users who mirror an iPad or iPhone display fo
 
 
 ### Step 1: Install the Application
+
+**Option A: Windows Package Manager (winget)**
+```powershell
+winget install jorjanion.UxPlayDesktop
+```
+
+**Option B: Standalone Installer**
 1. Download **[`UxPlayDesktop-Setup.exe`](https://github.com/jorjanion/uxplay-desktop/releases/latest)** from the latest release.
 2. Run the installer and follow the simple on-screen wizard.
 3. The installer will automatically:
