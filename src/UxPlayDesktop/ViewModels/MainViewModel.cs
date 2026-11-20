@@ -164,7 +164,7 @@ public class MainViewModel : ViewModelBase
     public string DisplayAudioDelay => string.Format(Loc["AudioDelayFormat"], Settings.AudioDelayMs);
     public string DisplayStep3Desc => string.Format(Loc["Step3Desc"], Settings.ServerName);
     public string AppVersionDisplay => "UxPlay Desktop v1.2.3";
-    public string LocalNetworkInfo => GetLocalNetworkInfo();
+    public string LocalNetworkInfo => GetLocalNetworkInfo(Settings.NetworkAdapterId);
 
     public bool StartOnBoot
     {
@@ -380,6 +380,7 @@ public class MainViewModel : ViewModelBase
             {
                 Settings.NetworkAdapterId = value.AdapterId;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(LocalNetworkInfo));
                 SaveSettings();
             }
         }
@@ -400,6 +401,7 @@ public class MainViewModel : ViewModelBase
         // If the saved adapter is no longer present, keep the saved id so it is used again
         // when it comes back, but show "Automatic" in the picker until then.
         OnPropertyChanged(nameof(SelectedNetworkAdapter));
+        OnPropertyChanged(nameof(LocalNetworkInfo));
     }
 
     public DisplayInfo? SelectedDisplay
@@ -778,15 +780,30 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(StartMinimized));
     }
 
-    private static string GetLocalNetworkInfo()
+    private static string GetLocalNetworkInfo(string adapterId)
     {
         try
         {
+            // A specific adapter was chosen in Settings: show that one.
+            if (!string.IsNullOrWhiteSpace(adapterId))
+            {
+                var selected = NetworkAdapterService.GetAdapters()
+                    .FirstOrDefault(a => string.Equals(a.Id, adapterId, StringComparison.OrdinalIgnoreCase));
+                if (selected != null)
+                {
+                    return $"{selected.Ipv4} ({selected.Name})";
+                }
+            }
+
             var interfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
                 .Where(ni => ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
                              ni.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback &&
                              !ni.Description.Contains("Virtual", StringComparison.OrdinalIgnoreCase) &&
                              !ni.Description.Contains("Pseudo", StringComparison.OrdinalIgnoreCase))
+                // Prefer adapters with a default gateway (what automatic selection uses), e.g. Ethernet over a Tailscale tunnel.
+                .OrderByDescending(ni => ni.GetIPProperties().GatewayAddresses.Any(g =>
+                    g.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
+                    !g.Address.Equals(System.Net.IPAddress.Any)))
                 .ToList();
 
             foreach (var ni in interfaces)
