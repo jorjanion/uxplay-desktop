@@ -363,6 +363,45 @@ public class MainViewModel : ViewModelBase
 
     public IReadOnlyList<DisplayInfo> AvailableDisplays => _windowService.GetConnectedDisplays();
 
+    private IReadOnlyList<NetworkAdapterOption> _availableNetworkAdapters = Array.Empty<NetworkAdapterOption>();
+    public IReadOnlyList<NetworkAdapterOption> AvailableNetworkAdapters
+    {
+        get => _availableNetworkAdapters;
+        private set => SetField(ref _availableNetworkAdapters, value);
+    }
+
+    public NetworkAdapterOption? SelectedNetworkAdapter
+    {
+        get => AvailableNetworkAdapters.FirstOrDefault(o => o.AdapterId == Settings.NetworkAdapterId)
+               ?? AvailableNetworkAdapters.FirstOrDefault();
+        set
+        {
+            if (value != null && Settings.NetworkAdapterId != value.AdapterId)
+            {
+                Settings.NetworkAdapterId = value.AdapterId;
+                OnPropertyChanged();
+                SaveSettings();
+            }
+        }
+    }
+
+    /// <summary>Re-reads the adapter list (e.g. after Tailscale or a VPN connects).</summary>
+    public void RefreshNetworkAdapters()
+    {
+        var options = new List<NetworkAdapterOption>
+        {
+            new(string.Empty, Loc["NetworkAdapterAuto"])
+        };
+        options.AddRange(NetworkAdapterService.GetAdapters()
+            .Select(a => new NetworkAdapterOption(a.Id, $"{a.Name} - {a.Ipv4}")));
+
+        AvailableNetworkAdapters = options;
+
+        // If the saved adapter is no longer present, keep the saved id so it is used again
+        // when it comes back, but show "Automatic" in the picker until then.
+        OnPropertyChanged(nameof(SelectedNetworkAdapter));
+    }
+
     public DisplayInfo? SelectedDisplay
     {
         get => AvailableDisplays.FirstOrDefault(d => d.Index == Settings.TargetDisplayIndex) ?? AvailableDisplays.FirstOrDefault();
@@ -520,6 +559,7 @@ public class MainViewModel : ViewModelBase
 
     public ICommand ToggleServerCommand { get; }
     public ICommand SaveSettingsCommand { get; }
+    public ICommand RefreshNetworkAdaptersCommand { get; }
     public ICommand FixBonjourCommand { get; }
     public ICommand DismissPinCommand { get; }
     public ICommand ApplyUpdateCommand { get; }
@@ -604,6 +644,8 @@ public class MainViewModel : ViewModelBase
 
         ToggleServerCommand = new RelayCommand(async () => await ToggleServerAsync());
         SaveSettingsCommand = new RelayCommand(SaveSettings);
+        RefreshNetworkAdaptersCommand = new RelayCommand(RefreshNetworkAdapters);
+        RefreshNetworkAdapters();
         FixBonjourCommand = new RelayCommand(FixBonjour);
         DismissPinCommand = new RelayCommand(() => ActivePinCode = null);
         ApplyUpdateCommand = new RelayCommand(async () => await ApplyUpdateAsync());

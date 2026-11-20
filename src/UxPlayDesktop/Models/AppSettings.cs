@@ -55,6 +55,7 @@ public class AppSettings
     public bool EnableBluetoothBeacon { get; set; } = true;
     public bool InhibitSleepAndScreensaver { get; set; } = true;
     public int NetworkPort { get; set; } = 0; // 0 for automatic port allocation
+    public string NetworkAdapterId { get; set; } = string.Empty; // empty = automatic; otherwise NetworkInterface.Id of the adapter to advertise on
 
     // Advanced / Diagnostics
     public bool VerboseLogging { get; set; } = false;

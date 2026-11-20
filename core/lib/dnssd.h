@@ -46,6 +46,7 @@ typedef struct dnssd_s {
     uint32_t features2;
 
     unsigned char pin_pw;
+    uint32_t ipv4_interface;  /* network-order IPv4 of the adapter to advertise on; 0 = automatic */
     void *dnssd_private;
   
 /* p2p support (macOS only) */
@@ -73,6 +74,13 @@ DNSSD_API const char *dnssd_get_hw_addr(dnssd_t *dnssd, int *length);
 DNSSD_API void dnssd_set_airplay_features(dnssd_t *dnssd, int bit, int val);
 DNSSD_API uint64_t dnssd_get_airplay_features(dnssd_t *dnssd);
 DNSSD_API void dnssd_set_pk(dnssd_t *dnssd, char * pk_str);
+
+/* Restrict service advertising to the network adapter that owns this IPv4 address
+   (dotted-quad string, e.g. "192.168.1.20" or "100.100.10.5" for Tailscale).
+   Must be called before dnssd_register_raop()/dnssd_register_airplay().
+   Returns 0 on success, -1 if the string is not a valid IPv4 address.
+   Passing NULL or "" restores automatic adapter selection. */
+DNSSD_API int dnssd_set_interface_ipv4(dnssd_t *dnssd, const char *ipv4);
 
 /* An external dns_sd.h library (Avahi's compat layer, Bonjour) hands each
    registered service a socket that the application must service with

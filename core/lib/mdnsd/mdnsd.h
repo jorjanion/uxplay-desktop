@@ -44,6 +44,10 @@ void mdnsd_destroy(mdnsd_t *mdnsd);
 int mdnsd_start(mdnsd_t *mdnsd);
 void mdnsd_stop(mdnsd_t *mdnsd);
 
+/* ipv4_addr is in network byte order; 0 restores automatic adapter selection.
+   Takes effect the next time mdnsd_start() opens its sockets. */
+void mdnsd_set_preferred_ipv4(mdnsd_t *mdnsd, uint32_t ipv4_addr);
+
 void mdnsd_set_services(mdnsd_t *mdnsd, const mdnsd_service_t *airplay,
                         const mdnsd_service_t *raop);
 void mdnsd_announce(mdnsd_t *mdnsd, uint32_t ttl);

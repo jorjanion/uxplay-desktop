@@ -251,6 +251,7 @@ dnssd_register_raop(dnssd_t *dnssd_public, unsigned short port)
 
     dnssd->raop_port = port;
     dnssd->raop_registered = 1;
+    mdnsd_set_preferred_ipv4(dnssd->mdnsd, dnssd_public->ipv4_interface);
     dnssd_update_mdnsd(dnssd);
 
     ret = mdnsd_start(dnssd->mdnsd);
@@ -276,6 +277,7 @@ dnssd_register_airplay(dnssd_t *dnssd_public, unsigned short port)
 
     dnssd->airplay_port = port;
     dnssd->airplay_registered = 1;
+    mdnsd_set_preferred_ipv4(dnssd->mdnsd, dnssd_public->ipv4_interface);
     dnssd_update_mdnsd(dnssd);
 
     ret = mdnsd_start(dnssd->mdnsd);

@@ -26,6 +26,7 @@
 
 #include "dnssdint.h"
 #include "utils.h"
+#include "compat.h"
 
 #if defined(__APPLE__) && defined(UXPLAY_HAVE_APPLE_P2P)
 /* p2p support (macOS only) */
@@ -38,6 +39,25 @@ void dnssd_set_peer_to_peer(dnssd_t *dnssd, int enabled) {
     netutils_set_peer_to_peer(dnssd->peer_to_peer);
 }
 #endif
+
+int
+dnssd_set_interface_ipv4(dnssd_t *dnssd, const char *ipv4)
+{
+    struct in_addr addr;
+
+    if (!dnssd) {
+        return -1;
+    }
+    if (!ipv4 || !*ipv4) {
+        dnssd->ipv4_interface = 0;
+        return 0;
+    }
+    if (inet_pton(AF_INET, ipv4, &addr) != 1 || addr.s_addr == 0) {
+        return -1;
+    }
+    dnssd->ipv4_interface = (uint32_t) addr.s_addr;
+    return 0;
+}
 
 dnssd_t *
 dnssd_init(const char* name, int name_len, const char* hw_addr, int hw_addr_len, unsigned char pin_pw, int *error)

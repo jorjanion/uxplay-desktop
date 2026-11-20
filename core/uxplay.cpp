@@ -176,6 +176,7 @@ static guint min_password_length = MIN_PASSWORD_LENGTH;
 static unsigned short pin = 0;
 static std::string keyfile = "";
 static std::string mac_address = "";
+static std::string interface_ipv4 = "";
 static std::string dacpfile = "";
 static bool registration_list = false;
 static std::string pairing_register = "";
@@ -1269,6 +1270,8 @@ static void print_info (char *name) {
     printf("-fps n    Set maximum allowed streaming framerate, default 30\n");
     printf("-f {H|V|I}Horizontal|Vertical flip, or both=Inversion=rotate 180 deg\n");
     printf("-r {R|L}  Rotate 90 degrees Right (cw) or Left (ccw)\n");
+    printf("-i ipv4   Advertise only on the network adapter with this IPv4 address\n");
+    printf("          (e.g. a LAN address, or a Tailscale 100.x.y.z address); default: automatic\n");
     printf("-m [mac]  Set MAC address (also Device ID);use for concurrent UxPlays\n");
     printf("          if mac xx:xx:xx:xx:xx:xx is not given, a random MAC is used\n");
     printf("-key [fn] Store private key in $HOME/.uxplay.pem (or in file \"fn\")\n");
@@ -1876,6 +1879,13 @@ static void parse_arguments (int argc, char *argv[]) {
                 for (int j = 0; j < 3; j++) {
                     udp[j] = tcp[j];
                 }
+            }
+        } else if (arg == "-i") {
+            if (i < argc - 1 && *argv[i+1] != '-') {
+                interface_ipv4 = argv[++i];
+            } else {
+                fprintf(stderr, "-i requires an IPv4 address of the network adapter to use\n");
+                exit(1);
             }
         } else if (arg == "-m") {
             if (i < argc - 1 && *argv[i+1] != '-') {
@@ -2543,6 +2553,14 @@ static int start_dnssd(std::vector<char> hw_addr, std::string name) {
     if (dnssd_error) {
         LOGE("Could not initialize dnssd library!: error %d", dnssd_error);
         return 1;
+    }
+
+    if (!interface_ipv4.empty()) {
+        if (dnssd_set_interface_ipv4(dnssd, interface_ipv4.c_str()) != 0) {
+            LOGE("invalid IPv4 address \"%s\" given with -i", interface_ipv4.c_str());
+            return 1;
+        }
+        LOGI("advertising only on network adapter %s", interface_ipv4.c_str());
     }
 
 #if defined(__APPLE__) && defined(UXPLAY_HAVE_APPLE_P2P)
