@@ -509,6 +509,26 @@
                                               DisplayMemberPath="DisplayLabel"
                                               Margin="0,0,0,12" />
 
+                                    <!-- Network Adapter Selector (which LAN / Tailscale / VPN adapter AirPlay is advertised on) -->
+                                    <TextBlock Text="{Binding Loc[NetworkAdapterLabel]}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox Grid.Column="0"
+                                                  ItemsSource="{Binding AvailableNetworkAdapters}"
+                                                  SelectedItem="{Binding SelectedNetworkAdapter}"
+                                                  DisplayMemberPath="Label"
+                                                  Height="36" />
+                                        <Button Grid.Column="1"
+                                                Command="{Binding RefreshNetworkAdaptersCommand}"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Content="{Binding Loc[NetworkAdapterRefresh]}"
+                                                Margin="8,0,0,0" />
+                                    </Grid>
+                                    <TextBlock Text="{Binding Loc[NetworkAdapterHelp]}" FontSize="11" Foreground="#94A3B8" Margin="0,0,0,12" TextWrapping="Wrap" />
+
                                     <!-- Checkboxes -->
                                     <CheckBox Content="{Binding Loc[StartWithWindowsLabel]}" IsChecked="{Binding StartOnBoot}" Margin="0,0,0,6" />
                                     <CheckBox Content="{Binding Loc[StartMinimizedLabel]}" IsChecked="{Binding StartMinimized}" Margin="20,0,0,8" />

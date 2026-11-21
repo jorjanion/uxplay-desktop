@@ -157,6 +157,14 @@ public class ArgumentBuilder : IArgumentBuilder
             args.Add(settings.NetworkPort.ToString());
         }
 
+        // Network adapter to advertise on (-i <ipv4>); omitted = automatic selection
+        var adapterIpv4 = NetworkAdapterService.ResolveIpv4(settings.NetworkAdapterId);
+        if (!string.IsNullOrEmpty(adapterIpv4))
+        {
+            args.Add("-i");
+            args.Add(adapterIpv4);
+        }
+
         // Bluetooth Low Energy Beacon
         if (settings.EnableBluetoothBeacon && !string.IsNullOrWhiteSpace(bleStatusPath))
         {

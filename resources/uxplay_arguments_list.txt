@@ -71,6 +71,8 @@ Options:
 -fps n    Set maximum allowed streaming framerate, default 30
 -f {H|V|I}Horizontal|Vertical flip, or both=Inversion=rotate 180 deg
 -r {R|L}  Rotate 90 degrees Right (cw) or Left (ccw)
+-i ipv4   Advertise only on the network adapter with this IPv4 address
+          (e.g. a LAN address, or a Tailscale 100.x.y.z address); default: automatic
 -m [mac]  Set MAC address (also Device ID);use for concurrent UxPlays
           if mac xx:xx:xx:xx:xx:xx is not given, a random MAC is used
 -key [fn] Store private key in $HOME/.uxplay.pem (or in file "fn")

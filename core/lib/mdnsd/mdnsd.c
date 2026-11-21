@@ -60,6 +60,7 @@ struct mdnsd_s {
     mdnsd_service_t raop;
 
     uint32_t ipv4_addr;
+    uint32_t preferred_ipv4;
     unsigned char ipv6_addr[16];
     unsigned int ipv6_scope_id;
     int sock_fd4;
@@ -1020,6 +1021,17 @@ void mdnsd_destroy(mdnsd_t *mdnsd)
     free(mdnsd);
 }
 
+void mdnsd_set_preferred_ipv4(mdnsd_t *mdnsd, uint32_t ipv4_addr)
+{
+    if (!mdnsd) {
+        return;
+    }
+
+    MUTEX_LOCK(mdnsd->mutex);
+    mdnsd->preferred_ipv4 = ipv4_addr;
+    MUTEX_UNLOCK(mdnsd->mutex);
+}
+
 int mdnsd_start(mdnsd_t *mdnsd)
 {
     if (!mdnsd) {
@@ -1035,7 +1047,7 @@ int mdnsd_start(mdnsd_t *mdnsd)
     int error4 = 0;
     int error6 = 0;
 
-    mdnsd->ipv4_addr = mdns_get_default_ipv4();
+    mdnsd->ipv4_addr = mdnsd->preferred_ipv4 ? mdnsd->preferred_ipv4 : mdns_get_default_ipv4();
     mdns_get_default_ipv6(mdnsd->ipv6_addr, &mdnsd->ipv6_scope_id);
 
     mdnsd->sock_fd4 = mdns_open_socket4(mdnsd->ipv4_addr);
