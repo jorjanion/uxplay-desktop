@@ -454,9 +454,15 @@
                                                 Style="{StaticResource SecondaryButtonStyle}"
                                                 Margin="0,0,8,0"
                                                 VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="🩺 " FontSize="12" />
-                                                <TextBlock Text="{Binding Loc[DiagnosticButton]}" />
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Path Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                      Data="M4.5,3 L4.5,8 A4.5,4.5 0 0 0 13.5,8 L13.5,3 M2,3 L7,3 M11,3 L16,3 M9,12.5 A5.5,5.5 0 0 0 14.5,18 L16,18 A3,3 0 0 0 19,15 L19,14.5 A2.5,2.5 0 1 0 16,14.5 L16,15 A1,1 0 0 1 15,16 L13.5,16 A3.5,3.5 0 0 1 7,12.5"
+                                                      Stroke="{DynamicResource AccentBrush}"
+                                                      StrokeThickness="1.8"
+                                                      StrokeLineJoin="Round"
+                                                      StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round" />
+                                                <TextBlock Text="{Binding Loc[DiagnosticButton]}" VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Button>
 
