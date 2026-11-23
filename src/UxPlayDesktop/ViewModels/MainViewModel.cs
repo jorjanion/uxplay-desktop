@@ -21,6 +21,7 @@ public class MainViewModel : ViewModelBase
     private readonly IWindowManagementService _windowService;
     private readonly IGlobalHotkeyService _hotkeyService;
     private readonly DispatcherTimer _sessionTimer;
+    private readonly DispatcherTimer _updateCheckTimer;
 
     private AppSettings _settings;
     private ServerState _serverState = ServerState.Stopped;
@@ -34,6 +35,9 @@ public class MainViewModel : ViewModelBase
     private string _updateVersionText = "";
     private bool _isUpdating;
     private int _updateProgress;
+    private string? _pendingUpdatePackagePath;
+    private bool _isUpdateDownloadedAndPending;
+    private bool _isAutoDownloading;
 
     private bool _isRunningDiagnostic;
     private bool _showDiagnosticDialog;
@@ -74,6 +78,10 @@ public class MainViewModel : ViewModelBase
                 else
                 {
                     _windowPlacementCts?.Cancel();
+                    if (value != ServerState.Connecting)
+                    {
+                        TryApplyPendingUpdate();
+                    }
                 }
             }
         }
@@ -269,6 +277,28 @@ public class MainViewModel : ViewModelBase
             }
         }
     }
+
+    public bool AutoUpdate
+    {
+        get => Settings.AutoUpdate;
+        set
+        {
+            if (Settings.AutoUpdate != value)
+            {
+                Settings.AutoUpdate = value;
+                OnPropertyChanged();
+                SaveSettings();
+            }
+        }
+    }
+
+    public bool IsStreamingSessionActive =>
+        ServerState == ServerState.Streaming ||
+        ServerState == ServerState.Connecting ||
+        (Session != null && !string.IsNullOrWhiteSpace(Session.ClientIpAddress) && ServerState != ServerState.Stopped);
+
+    public bool IsUpdateDownloadedAndPending => _isUpdateDownloadedAndPending;
+    public string? PendingUpdatePackagePath => _pendingUpdatePackagePath;
 
     public bool EnableGlobalHotkeys
     {
@@ -712,6 +742,13 @@ public class MainViewModel : ViewModelBase
         _sessionTimer.Tick += (_, _) => UpdateDuration();
         _sessionTimer.Start();
 
+        _updateCheckTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromHours(4)
+        };
+        _updateCheckTimer.Tick += async (_, _) => await CheckForUpdatesAsync();
+        _updateCheckTimer.Start();
+
         CheckBonjourStatus();
 
         if (Settings.AutoStartServer)
@@ -726,6 +763,13 @@ public class MainViewModel : ViewModelBase
     {
         if (IsUpdating) return;
         if (_latestUpdate == null || string.IsNullOrEmpty(_latestUpdate.DownloadUrl)) return;
+
+        if (_isUpdateDownloadedAndPending && !string.IsNullOrEmpty(_pendingUpdatePackagePath))
+        {
+            _updateService.ApplyDownloadedUpdate(_pendingUpdatePackagePath, verySilent: false);
+            return;
+        }
+
         IsUpdating = true;
         UpdateProgress = 0;
         bool ok = await _updateService.DownloadAndApplyUpdateAsync(_latestUpdate.DownloadUrl, p => RunOnUi(() => UpdateProgress = p));
@@ -737,7 +781,7 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    private async Task CheckForUpdatesAsync()
+    public async Task CheckForUpdatesAsync()
     {
         try
         {
@@ -750,9 +794,56 @@ public class MainViewModel : ViewModelBase
                     UpdateVersionText = info.LatestVersion;
                     IsUpdateAvailable = true;
                 });
+
+                if (Settings.AutoUpdate && !string.IsNullOrEmpty(info.DownloadUrl))
+                {
+                    await AutoDownloadAndScheduleUpdateAsync(info.DownloadUrl);
+                }
             }
         }
         catch { }
+    }
+
+    public async Task AutoDownloadAndScheduleUpdateAsync(string downloadUrl)
+    {
+        if (_isAutoDownloading || _isUpdateDownloadedAndPending || IsUpdating) return;
+
+        try
+        {
+            _isAutoDownloading = true;
+            var packagePath = await _updateService.DownloadUpdatePackageAsync(
+                downloadUrl,
+                p => RunOnUi(() => UpdateProgress = p)).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(packagePath))
+            {
+                _pendingUpdatePackagePath = packagePath;
+                _isUpdateDownloadedAndPending = true;
+
+                RunOnUi(TryApplyPendingUpdate);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Auto-update background error: {ex.Message}");
+        }
+        finally
+        {
+            _isAutoDownloading = false;
+        }
+    }
+
+    public void TryApplyPendingUpdate()
+    {
+        if (!_isUpdateDownloadedAndPending || string.IsNullOrEmpty(_pendingUpdatePackagePath)) return;
+
+        if (IsStreamingSessionActive)
+        {
+            // Active streaming session in progress: delay restart until transmission completes
+            return;
+        }
+
+        _updateService.ApplyDownloadedUpdate(_pendingUpdatePackagePath, verySilent: true);
     }
 
     private void FixBonjour()
@@ -878,6 +969,10 @@ public class MainViewModel : ViewModelBase
         if (ServerState == ServerState.Streaming && !string.IsNullOrEmpty(Session.ActiveResolution))
         {
             _windowService.MoveVideoWindowToDisplay(Settings.TargetDisplayIndex, Settings.ForceFullscreen);
+        }
+        else if (!IsStreamingSessionActive)
+        {
+            TryApplyPendingUpdate();
         }
     }
 

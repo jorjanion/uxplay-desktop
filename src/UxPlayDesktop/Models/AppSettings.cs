@@ -11,6 +11,7 @@ public class AppSettings
     public bool MinimizeToTray { get; set; } = true;
     public bool StartMinimized { get; set; } = false;
     public bool AutoStartServer { get; set; } = true;
+    public bool AutoUpdate { get; set; } = true;
 
     // Preset & Streaming
     [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -549,6 +549,7 @@
                                     <CheckBox Content="{Binding Loc[HotkeysLabel]}" IsChecked="{Binding EnableGlobalHotkeys}" Margin="0,0,8,0" />
                                     <TextBlock Text="{Binding Loc[HotkeysHelp]}" FontSize="11" Foreground="#94A3B8" Margin="24,2,0,8" TextWrapping="Wrap" />
                                     <CheckBox Content="{Binding Loc[AutoStartServerLabel]}" IsChecked="{Binding Settings.AutoStartServer}" Margin="0,0,0,8" />
+                                    <CheckBox Content="{Binding Loc[AutoUpdateLabel]}" IsChecked="{Binding AutoUpdate}" Margin="0,0,0,8" />
                                     <CheckBox Content="{Binding Loc[InhibitSleepLabel]}" IsChecked="{Binding Settings.InhibitSleepAndScreensaver}" Margin="0,0,0,8" />
                                     <CheckBox Content="{Binding Loc[EnableBleLabel]}" IsChecked="{Binding Settings.EnableBluetoothBeacon}" Margin="0,0,0,4" />
                                 </StackPanel>

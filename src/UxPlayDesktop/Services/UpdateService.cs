@@ -24,6 +24,8 @@ public interface IUpdateService
 {
     string? LastError { get; }
     Task<UpdateInfo?> CheckForUpdatesAsync();
+    Task<string?> DownloadUpdatePackageAsync(string downloadUrl, Action<int>? progressCallback = null);
+    bool ApplyDownloadedUpdate(string downloadedFilePath, bool verySilent = false);
     Task<bool> DownloadAndApplyUpdateAsync(string downloadUrl, Action<int>? progressCallback = null);
 }
 
@@ -103,12 +105,12 @@ public class UpdateService : IUpdateService
         }
     }
 
-    public async Task<bool> DownloadAndApplyUpdateAsync(string downloadUrl, Action<int>? progressCallback = null)
+    public async Task<string?> DownloadUpdatePackageAsync(string downloadUrl, Action<int>? progressCallback = null)
     {
         if (string.IsNullOrEmpty(downloadUrl))
         {
             LastError = "Download URL is empty.";
-            return false;
+            return null;
         }
 
         try
@@ -147,7 +149,7 @@ public class UpdateService : IUpdateService
             if (totalBytes > 0 && totalRead < totalBytes)
             {
                 LastError = $"Download was incomplete ({totalRead}/{totalBytes} bytes). Please try again.";
-                return false;
+                return null;
             }
 
             if (isExe)
@@ -156,9 +158,34 @@ public class UpdateService : IUpdateService
                 if (!fi.Exists || fi.Length < 50_000_000)
                 {
                     LastError = $"Downloaded update package is incomplete ({fi.Length / 1024 / 1024} MB). Please try again or download directly from GitHub Releases.";
-                    return false;
+                    return null;
                 }
+            }
 
+            return downloadedFile;
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            return null;
+        }
+    }
+
+    public bool ApplyDownloadedUpdate(string downloadedFilePath, bool verySilent = false)
+    {
+        if (string.IsNullOrEmpty(downloadedFilePath) || !File.Exists(downloadedFilePath))
+        {
+            LastError = "Downloaded update file not found.";
+            return false;
+        }
+
+        try
+        {
+            LastError = null;
+            bool isExe = downloadedFilePath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+
+            if (isExe)
+            {
                 // Cleanly kill native engine process prior to running update
                 try
                 {
@@ -169,11 +196,19 @@ public class UpdateService : IUpdateService
                 }
                 catch { }
 
-                // Run installer with robust automated upgrade flags (/SILENT shows progress bar while suppressing questions)
+                // Inno Setup flags:
+                // /VERYSILENT suppresses all windows, /SILENT shows small progress bar
+                // /SUPPRESSMSGBOXES prevents any message boxes from blocking
+                // /NORESTART prevents Windows from rebooting
+                // /SP- suppresses initial prompt
+                var args = verySilent
+                    ? "/VERYSILENT /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS /NORESTART /SP-"
+                    : "/SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS /NORESTART /SP-";
+
                 var psi = new ProcessStartInfo
                 {
-                    FileName = downloadedFile,
-                    Arguments = "/SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS /NORESTART /SP-",
+                    FileName = downloadedFilePath,
+                    Arguments = args,
                     UseShellExecute = true,
                     Verb = "runas"
                 };
@@ -185,8 +220,9 @@ public class UpdateService : IUpdateService
             else
             {
                 // Portable ZIP fallback update
+                var tempDir = Path.GetDirectoryName(downloadedFilePath) ?? Path.GetTempPath();
                 var extractPath = Path.Combine(tempDir, "extracted");
-                ZipFile.ExtractToDirectory(downloadedFile, extractPath, true);
+                ZipFile.ExtractToDirectory(downloadedFilePath, extractPath, true);
 
                 var currentExe = Process.GetCurrentProcess().MainModule?.FileName;
                 var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
@@ -205,7 +241,7 @@ xcopy ""{extractPath}\*"" ""{installDir}\"" /s /e /y /q > nul
 start """" ""{currentExe}""
 exit
 ";
-                await File.WriteAllTextAsync(updaterScript, scriptContent).ConfigureAwait(false);
+                File.WriteAllText(updaterScript, scriptContent);
 
                 var psi = new ProcessStartInfo
                 {
@@ -225,6 +261,13 @@ exit
             LastError = ex.Message;
             return false;
         }
+    }
+
+    public async Task<bool> DownloadAndApplyUpdateAsync(string downloadUrl, Action<int>? progressCallback = null)
+    {
+        var packagePath = await DownloadUpdatePackageAsync(downloadUrl, progressCallback).ConfigureAwait(false);
+        if (string.IsNullOrEmpty(packagePath)) return false;
+        return ApplyDownloadedUpdate(packagePath, verySilent: false);
     }
 
     public static (string DownloadUrl, bool IsInstaller) SelectBestAsset(
