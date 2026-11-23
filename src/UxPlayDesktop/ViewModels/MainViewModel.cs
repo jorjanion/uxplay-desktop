@@ -66,6 +66,15 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(DisplayClientIp));
                 OnPropertyChanged(nameof(SessionActiveText));
                 CommandManager.InvalidateRequerySuggested();
+
+                if (value == ServerState.Streaming)
+                {
+                    StartVideoWindowPlacementMonitor();
+                }
+                else
+                {
+                    _windowPlacementCts?.Cancel();
+                }
             }
         }
     }
@@ -361,7 +370,12 @@ public class MainViewModel : ViewModelBase
         set => SetField(ref _windowMinHeight, value);
     }
 
-    public IReadOnlyList<DisplayInfo> AvailableDisplays => _windowService.GetConnectedDisplays();
+    private IReadOnlyList<DisplayInfo> _availableDisplays = Array.Empty<DisplayInfo>();
+    public IReadOnlyList<DisplayInfo> AvailableDisplays
+    {
+        get => _availableDisplays;
+        private set => SetField(ref _availableDisplays, value);
+    }
 
     private IReadOnlyList<NetworkAdapterOption> _availableNetworkAdapters = Array.Empty<NetworkAdapterOption>();
     public IReadOnlyList<NetworkAdapterOption> AvailableNetworkAdapters
@@ -406,17 +420,28 @@ public class MainViewModel : ViewModelBase
 
     public DisplayInfo? SelectedDisplay
     {
-        get => AvailableDisplays.FirstOrDefault(d => d.Index == Settings.TargetDisplayIndex) ?? AvailableDisplays.FirstOrDefault();
+        get => AvailableDisplays.FirstOrDefault(d => d.Index == Settings.TargetDisplayIndex)
+               ?? AvailableDisplays.FirstOrDefault();
         set
         {
             if (value != null && Settings.TargetDisplayIndex != value.Index)
             {
                 Settings.TargetDisplayIndex = value.Index;
                 OnPropertyChanged();
-                _windowService.MoveVideoWindowToDisplay(value.Index);
+                _windowService.MoveVideoWindowToDisplay(value.Index, Settings.ForceFullscreen);
+                if (Settings.AlwaysOnTop)
+                {
+                    _windowService.SetAlwaysOnTop(true);
+                }
                 SaveSettings();
             }
         }
+    }
+
+    public void RefreshDisplays()
+    {
+        AvailableDisplays = _windowService.GetConnectedDisplays();
+        OnPropertyChanged(nameof(SelectedDisplay));
     }
 
     public bool IsRunningDiagnostic
@@ -561,6 +586,7 @@ public class MainViewModel : ViewModelBase
 
     public ICommand ToggleServerCommand { get; }
     public ICommand SaveSettingsCommand { get; }
+    public ICommand RefreshDisplaysCommand { get; }
     public ICommand RefreshNetworkAdaptersCommand { get; }
     public ICommand FixBonjourCommand { get; }
     public ICommand DismissPinCommand { get; }
@@ -637,6 +663,7 @@ public class MainViewModel : ViewModelBase
             OnPropertyChanged(nameof(VolumeDisplay));
             OnPropertyChanged(nameof(MuteButtonText));
             OnPropertyChanged(nameof(SessionActiveText));
+            RefreshDisplays();
         };
 
         _processManager.StateChanged += state => RunOnUi(() => ServerState = state);
@@ -646,6 +673,8 @@ public class MainViewModel : ViewModelBase
 
         ToggleServerCommand = new RelayCommand(async () => await ToggleServerAsync());
         SaveSettingsCommand = new RelayCommand(SaveSettings);
+        RefreshDisplaysCommand = new RelayCommand(RefreshDisplays);
+        RefreshDisplays();
         RefreshNetworkAdaptersCommand = new RelayCommand(RefreshNetworkAdapters);
         RefreshNetworkAdapters();
         FixBonjourCommand = new RelayCommand(FixBonjour);
@@ -845,6 +874,66 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(DisplayClientName));
         OnPropertyChanged(nameof(DisplayClientIp));
         OnPropertyChanged(nameof(SessionActiveText));
+
+        if (ServerState == ServerState.Streaming && !string.IsNullOrEmpty(Session.ActiveResolution))
+        {
+            _windowService.MoveVideoWindowToDisplay(Settings.TargetDisplayIndex, Settings.ForceFullscreen);
+        }
+    }
+
+    private CancellationTokenSource? _windowPlacementCts;
+
+    private void StartVideoWindowPlacementMonitor()
+    {
+        _windowPlacementCts?.Cancel();
+        _windowPlacementCts?.Dispose();
+        _windowPlacementCts = new CancellationTokenSource();
+        var ct = _windowPlacementCts.Token;
+
+        _ = Task.Run(async () =>
+        {
+            for (int i = 0; i < 40; i++)
+            {
+                if (ct.IsCancellationRequested) return;
+
+                IntPtr hwnd = WindowManagementService.FindAirPlayVideoHwnd();
+                if (hwnd != IntPtr.Zero)
+                {
+                    RunOnUi(() =>
+                    {
+                        _windowService.MoveVideoWindowToDisplay(Settings.TargetDisplayIndex, Settings.ForceFullscreen);
+                        if (Settings.AlwaysOnTop)
+                        {
+                            _windowService.SetAlwaysOnTop(true, hwnd);
+                        }
+                    });
+
+                    try
+                    {
+                        await Task.Delay(500, ct).ConfigureAwait(false);
+                        if (!ct.IsCancellationRequested)
+                        {
+                            RunOnUi(() =>
+                            {
+                                _windowService.MoveVideoWindowToDisplay(Settings.TargetDisplayIndex, Settings.ForceFullscreen);
+                            });
+                        }
+                    }
+                    catch (OperationCanceledException) { }
+
+                    return;
+                }
+
+                try
+                {
+                    await Task.Delay(100, ct).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+            }
+        }, ct);
     }
 
     private void UpdateDuration()

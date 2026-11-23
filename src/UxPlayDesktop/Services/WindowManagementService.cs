@@ -2,22 +2,54 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 
 namespace UxPlayDesktop.Services;
 
-public class DisplayInfo
+public sealed class DisplayInfo : IEquatable<DisplayInfo>
 {
     public int Index { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string DeviceName { get; set; } = string.Empty;
     public int Width { get; set; }
     public int Height { get; set; }
     public bool IsPrimary { get; set; }
+    public int MonitorLeft { get; set; }
+    public int MonitorTop { get; set; }
+    public int MonitorRight { get; set; }
+    public int MonitorBottom { get; set; }
+    public int WorkLeft { get; set; }
+    public int WorkTop { get; set; }
+    public int WorkRight { get; set; }
+    public int WorkBottom { get; set; }
 
-    public string DisplayLabel => $"{Name} ({Width}x{Height}){(IsPrimary ? " [Principal]" : "")}";
+    public string DisplayLabel
+    {
+        get
+        {
+            var isSpanish = LocalizationService.Instance.CurrentLanguage.StartsWith("es", StringComparison.OrdinalIgnoreCase);
+            var primaryTag = IsPrimary ? (isSpanish ? " [Principal]" : " [Primary]") : "";
+            return $"{Name} ({Width}x{Height}){primaryTag}";
+        }
+    }
+
+    public bool Equals(DisplayInfo? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Index == other.Index;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as DisplayInfo);
+
+    public override int GetHashCode() => Index.GetHashCode();
+
+    public override string ToString() => DisplayLabel;
 }
 
 public interface IWindowManagementService
@@ -25,7 +57,7 @@ public interface IWindowManagementService
     IReadOnlyList<DisplayInfo> GetConnectedDisplays();
     void SetAlwaysOnTop(bool enable, IntPtr? targetHwnd = null);
     string? CaptureScreenshot(string? outputDirectory = null);
-    void MoveVideoWindowToDisplay(int displayIndex);
+    void MoveVideoWindowToDisplay(int displayIndex, bool forceFullscreen = false);
 }
 
 public class WindowManagementService : IWindowManagementService
@@ -34,8 +66,11 @@ public class WindowManagementService : IWindowManagementService
     private static readonly IntPtr HWND_NOTOPMOST = new(-2);
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_FRAMECHANGED = 0x0020;
     private const uint SWP_SHOWWINDOW = 0x0040;
     private const uint SRCCOPY = 0x00CC0020;
+    private const int SW_RESTORE = 9;
 
     [DllImport("user32.dll")]
     private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
@@ -81,6 +116,29 @@ public class WindowManagementService : IWindowManagementService
 
     private delegate bool MonitorEnumDelegate(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData);
 
+    [DllImport("user32.dll")]
+    private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsWindowVisible(IntPtr hWnd);
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
     [StructLayout(LayoutKind.Sequential)]
     private struct RECT
     {
@@ -105,6 +163,7 @@ public class WindowManagementService : IWindowManagementService
     {
         var list = new List<DisplayInfo>();
         int index = 0;
+        var isSpanish = LocalizationService.Instance.CurrentLanguage.StartsWith("es", StringComparison.OrdinalIgnoreCase);
 
         EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (IntPtr hMonitor, IntPtr _, ref RECT _, IntPtr _) =>
         {
@@ -117,12 +176,22 @@ public class WindowManagementService : IWindowManagementService
 
                 list.Add(new DisplayInfo
                 {
-                    Index = index++,
-                    Name = $"Pantalla {index}",
+                    Index = index,
+                    Name = isSpanish ? $"Pantalla {index + 1}" : $"Display {index + 1}",
+                    DeviceName = mi.szDevice ?? string.Empty,
                     Width = width,
                     Height = height,
-                    IsPrimary = isPrimary
+                    IsPrimary = isPrimary,
+                    MonitorLeft = mi.rcMonitor.Left,
+                    MonitorTop = mi.rcMonitor.Top,
+                    MonitorRight = mi.rcMonitor.Right,
+                    MonitorBottom = mi.rcMonitor.Bottom,
+                    WorkLeft = mi.rcWork.Left,
+                    WorkTop = mi.rcWork.Top,
+                    WorkRight = mi.rcWork.Right,
+                    WorkBottom = mi.rcWork.Bottom
                 });
+                index++;
             }
             return true;
         }, IntPtr.Zero);
@@ -132,10 +201,18 @@ public class WindowManagementService : IWindowManagementService
             list.Add(new DisplayInfo
             {
                 Index = 0,
-                Name = "Pantalla Principal",
+                Name = isSpanish ? "Pantalla Principal" : "Primary Display",
                 Width = 1920,
                 Height = 1080,
-                IsPrimary = true
+                IsPrimary = true,
+                MonitorLeft = 0,
+                MonitorTop = 0,
+                MonitorRight = 1920,
+                MonitorBottom = 1080,
+                WorkLeft = 0,
+                WorkTop = 0,
+                WorkRight = 1920,
+                WorkBottom = 1040
             });
         }
 
@@ -150,32 +227,55 @@ public class WindowManagementService : IWindowManagementService
         SetWindowPos(hwnd, enable ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
     }
 
-    public void MoveVideoWindowToDisplay(int displayIndex)
+    public void MoveVideoWindowToDisplay(int displayIndex, bool forceFullscreen = false)
     {
         IntPtr hwnd = FindAirPlayVideoHwnd();
         if (hwnd == IntPtr.Zero) return;
 
-        var displays = GetConnectedDisplays();
-        if (displayIndex < 0 || displayIndex >= displays.Count) return;
-
-        // Reposition window to target display coordinates
-        int monitorCount = 0;
-        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (IntPtr hMonitor, IntPtr _, ref RECT _, IntPtr _) =>
+        if (IsIconic(hwnd))
         {
-            if (monitorCount == displayIndex)
+            ShowWindow(hwnd, SW_RESTORE);
+        }
+
+        var displays = GetConnectedDisplays();
+        if (displays.Count == 0) return;
+
+        var targetDisplay = displays.FirstOrDefault(d => d.Index == displayIndex) ?? displays[0];
+
+        if (forceFullscreen)
+        {
+            int targetX = targetDisplay.MonitorLeft;
+            int targetY = targetDisplay.MonitorTop;
+            int targetWidth = targetDisplay.Width;
+            int targetHeight = targetDisplay.Height;
+
+            SetWindowPos(hwnd, IntPtr.Zero, targetX, targetY, targetWidth, targetHeight, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+        }
+        else
+        {
+            if (GetWindowRect(hwnd, out var curRect))
             {
-                var mi = new MONITORINFOEX { cbSize = Marshal.SizeOf(typeof(MONITORINFOEX)) };
-                if (GetMonitorInfo(hMonitor, ref mi))
-                {
-                    int x = mi.rcWork.Left + 50;
-                    int y = mi.rcWork.Top + 50;
-                    SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);
-                }
-                return false;
+                int curW = Math.Max(curRect.Right - curRect.Left, 640);
+                int curH = Math.Max(curRect.Bottom - curRect.Top, 480);
+
+                int workW = Math.Max(targetDisplay.WorkRight - targetDisplay.WorkLeft, targetDisplay.Width);
+                int workH = Math.Max(targetDisplay.WorkBottom - targetDisplay.WorkTop, targetDisplay.Height);
+
+                if (curW > workW) curW = workW;
+                if (curH > workH) curH = workH;
+
+                int targetX = targetDisplay.WorkLeft + Math.Max(0, (workW - curW) / 2);
+                int targetY = targetDisplay.WorkTop + Math.Max(0, (workH - curH) / 2);
+
+                SetWindowPos(hwnd, IntPtr.Zero, targetX, targetY, curW, curH, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
             }
-            monitorCount++;
-            return true;
-        }, IntPtr.Zero);
+            else
+            {
+                int targetX = targetDisplay.WorkLeft + 50;
+                int targetY = targetDisplay.WorkTop + 50;
+                SetWindowPos(hwnd, IntPtr.Zero, targetX, targetY, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+            }
+        }
     }
 
     public string? CaptureScreenshot(string? outputDirectory = null)
@@ -232,20 +332,71 @@ public class WindowManagementService : IWindowManagementService
 
     public static IntPtr FindAirPlayVideoHwnd()
     {
+        var uxplayPids = new HashSet<uint>();
         foreach (var proc in Process.GetProcessesByName("uxplay"))
         {
-            if (proc.MainWindowHandle != IntPtr.Zero)
+            try
             {
-                return proc.MainWindowHandle;
+                uxplayPids.Add((uint)proc.Id);
             }
+            catch { }
         }
 
-        IntPtr hwnd = FindWindow(null, "UxPlay");
-        if (hwnd != IntPtr.Zero) return hwnd;
+        IntPtr foundHwnd = IntPtr.Zero;
 
-        hwnd = FindWindow(null, "GstD3D11VideoSink");
-        if (hwnd != IntPtr.Zero) return hwnd;
+        // Pass 1: Look for any visible window owned by an uxplay process
+        if (uxplayPids.Count > 0)
+        {
+            EnumWindows((hWnd, _) =>
+            {
+                if (!IsWindowVisible(hWnd)) return true;
 
-        return IntPtr.Zero;
+                GetWindowThreadProcessId(hWnd, out uint pid);
+                if (uxplayPids.Contains(pid))
+                {
+                    if (GetWindowRect(hWnd, out var rect) &&
+                        (rect.Right - rect.Left > 10) &&
+                        (rect.Bottom - rect.Top > 10))
+                    {
+                        foundHwnd = hWnd;
+                        return false;
+                    }
+                }
+                return true;
+            }, IntPtr.Zero);
+        }
+
+        if (foundHwnd != IntPtr.Zero) return foundHwnd;
+
+        // Pass 2: Fallback by class name or window title
+        EnumWindows((hWnd, _) =>
+        {
+            if (!IsWindowVisible(hWnd)) return true;
+
+            var sbClass = new StringBuilder(256);
+            GetClassName(hWnd, sbClass, sbClass.Capacity);
+            var className = sbClass.ToString();
+
+            var sbTitle = new StringBuilder(256);
+            GetWindowText(hWnd, sbTitle, sbTitle.Capacity);
+            var title = sbTitle.ToString();
+
+            if (className.IndexOf("Gst", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                className.IndexOf("D3D11", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                className.IndexOf("D3D12", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                title.IndexOf("UxPlay", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                if (GetWindowRect(hWnd, out var rect) &&
+                    (rect.Right - rect.Left > 10) &&
+                    (rect.Bottom - rect.Top > 10))
+                {
+                    foundHwnd = hWnd;
+                    return false;
+                }
+            }
+            return true;
+        }, IntPtr.Zero);
+
+        return foundHwnd;
     }
 }

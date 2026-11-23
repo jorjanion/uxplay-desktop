@@ -42,6 +42,7 @@ public class MockProcessManager : ICoreProcessManager
     public void TriggerPinPrompt(string pin) => PinCodePrompt?.Invoke(pin);
     public void TriggerLog(LogEntry entry) => LogReceived?.Invoke(entry);
     public void TriggerState(ServerState state) => StateChanged?.Invoke(state);
+    public void TriggerSessionUpdated(AirPlaySession session) => SessionUpdated?.Invoke(session);
 }
 
 public class MockBonjourService : IBonjourService
@@ -61,6 +62,27 @@ public class MockAutostartService : IAutostartService
     {
         AutostartEnabled = enable;
         StartMinimized = startMinimized;
+    }
+}
+
+public class MockWindowManagementService : IWindowManagementService
+{
+    public List<DisplayInfo> Displays { get; set; } = new()
+    {
+        new DisplayInfo { Index = 0, Name = "Display 1", Width = 1920, Height = 1080, IsPrimary = true },
+        new DisplayInfo { Index = 1, Name = "Display 2", Width = 2560, Height = 1440, IsPrimary = false }
+    };
+    public int? LastMovedDisplayIndex { get; private set; }
+    public bool? LastForceFullscreen { get; private set; }
+    public bool? LastAlwaysOnTop { get; private set; }
+
+    public IReadOnlyList<DisplayInfo> GetConnectedDisplays() => Displays.AsReadOnly();
+    public void SetAlwaysOnTop(bool enable, IntPtr? targetHwnd = null) => LastAlwaysOnTop = enable;
+    public string? CaptureScreenshot(string? outputDirectory = null) => null;
+    public void MoveVideoWindowToDisplay(int displayIndex, bool forceFullscreen = false)
+    {
+        LastMovedDisplayIndex = displayIndex;
+        LastForceFullscreen = forceFullscreen;
     }
 }
 
@@ -278,5 +300,109 @@ public class MainViewModelTests
         vm.ToggleCompactModeCommand.Execute(null);
         Assert.False(vm.IsCompactMode);
         Assert.Equal(740, vm.WindowHeight);
+    }
+
+    [Fact]
+    public void DisplayInfo_Equality_ChecksIndex()
+    {
+        var d1 = new DisplayInfo { Index = 1, Name = "Monitor 2", Width = 1920, Height = 1080 };
+        var d2 = new DisplayInfo { Index = 1, Name = "Different Name", Width = 2560, Height = 1440 };
+        var d3 = new DisplayInfo { Index = 0, Name = "Monitor 1", Width = 1920, Height = 1080 };
+
+        Assert.Equal(d1, d2);
+        Assert.True(d1.Equals(d2));
+        Assert.Equal(d1.GetHashCode(), d2.GetHashCode());
+        Assert.NotEqual(d1, d3);
+    }
+
+    [Fact]
+    public void MainViewModel_SelectedDisplay_PreservesSavedTargetDisplayIndex()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        _settingsService.CurrentSettings.TargetDisplayIndex = 1;
+        var mockWindowService = new MockWindowManagementService();
+
+        var vm = new MainViewModel(
+            _settingsService,
+            _processManager,
+            _bonjourService,
+            _autostartService,
+            windowService: mockWindowService);
+
+        Assert.NotNull(vm.SelectedDisplay);
+        Assert.Equal(1, vm.SelectedDisplay.Index);
+        Assert.Equal("Display 2", vm.SelectedDisplay.Name);
+    }
+
+    [Fact]
+    public void MainViewModel_SelectedDisplay_ChangesTargetDisplayIndexAndSaves()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        _settingsService.CurrentSettings.TargetDisplayIndex = 0;
+        var mockWindowService = new MockWindowManagementService();
+
+        var vm = new MainViewModel(
+            _settingsService,
+            _processManager,
+            _bonjourService,
+            _autostartService,
+            windowService: mockWindowService);
+
+        Assert.Equal(0, vm.SelectedDisplay?.Index);
+
+        var targetDisplay = vm.AvailableDisplays.First(d => d.Index == 1);
+        vm.SelectedDisplay = targetDisplay;
+
+        Assert.Equal(1, vm.Settings.TargetDisplayIndex);
+        Assert.Equal(1, _settingsService.CurrentSettings.TargetDisplayIndex);
+        Assert.Equal(1, mockWindowService.LastMovedDisplayIndex);
+    }
+
+    [Fact]
+    public void MainViewModel_RefreshDisplays_UpdatesAvailableDisplays()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        var mockWindowService = new MockWindowManagementService();
+
+        var vm = new MainViewModel(
+            _settingsService,
+            _processManager,
+            _bonjourService,
+            _autostartService,
+            windowService: mockWindowService);
+
+        Assert.Equal(2, vm.AvailableDisplays.Count);
+
+        mockWindowService.Displays.Add(new DisplayInfo { Index = 2, Name = "Display 3", Width = 3840, Height = 2160 });
+        vm.RefreshDisplaysCommand.Execute(null);
+
+        Assert.Equal(3, vm.AvailableDisplays.Count);
+    }
+
+    [Fact]
+    public void MainViewModel_SessionActiveResolution_RepositionsWindowToTargetDisplay()
+    {
+        _settingsService.CurrentSettings.AutoStartServer = false;
+        _settingsService.CurrentSettings.TargetDisplayIndex = 1;
+        var mockWindowService = new MockWindowManagementService();
+
+        var vm = new MainViewModel(
+            _settingsService,
+            _processManager,
+            _bonjourService,
+            _autostartService,
+            windowService: mockWindowService);
+
+        // Put server in streaming state
+        _processManager.TriggerState(ServerState.Streaming);
+
+        // Update session with active resolution
+        _processManager.CurrentSession.ActiveResolution = "1920x1080";
+        _processManager.CurrentSession.State = ServerState.Streaming;
+
+        // Trigger session updated
+        _processManager.TriggerSessionUpdated(_processManager.CurrentSession);
+
+        Assert.Equal(1, mockWindowService.LastMovedDisplayIndex);
     }
 }
